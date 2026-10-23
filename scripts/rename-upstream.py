@@ -11,7 +11,6 @@ import sys
 
 # Phrases kept verbatim (they credit upstream or point at upstream resources).
 PROTECT = [
-    "storytold/gridcraft",
     "storytold_gridcraft",
     "GridCraft contributors",
     "GridCraft authors",
@@ -22,10 +21,15 @@ PROTECT = [
     "GridCraft name",
     "GridCraft is copyright",
     "like GridCraft",
-    "craft-libs",
-    "craftrules",
-    "craft-fonts",
-    "craft-common-actions",
+    # upstream issue, PR, release and file links stay upstream's; the bare repo path becomes ours
+    "storytold/gridcraft#",
+    "storytold/gridcraft/issues/",
+    "storytold/gridcraft/pull/",
+    "storytold/gridcraft/releases",
+    "storytold/gridcraft/blob/",
+    "storytold/gridcraft/tree/",
+    "storytold/gridcraft/commit",
+    '"repo": "storytold/gridcraft"',
 ]
 
 # Ordered replacements. Earlier entries win where they overlap with later ones.
@@ -37,6 +41,7 @@ MAP = [
     ("https://getartcraft.com/apps", "https://github.com/maludb"),
     ("https://getartcraft.com/", "https://maluos.com/"),
     ("Learning Machines LLC", "MaluOS"),
+    ("storytold/gridcraft", "maludb/malu123"),
     ("Library/Application Support/GridCraft", "Library/Application Support/Malu123"),
     # the generic case variants
     ("GRIDCRAFT", "MALU123"),

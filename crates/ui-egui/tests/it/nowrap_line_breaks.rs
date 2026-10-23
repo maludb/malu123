@@ -1,10 +1,10 @@
 //! Line breaks with Wrap Text off (#1604): Excel ignores them and draws the whole string on one line.
 
 use egui::Shape;
-use gridcraft_engine::Session;
+use malu123_engine::Session;
 use serde_json::json;
 
-type Harness = egui_kittest::Harness<'static, gridcraft_ui_egui::SheetApp>;
+type Harness = egui_kittest::Harness<'static, malu123_ui_egui::SheetApp>;
 
 fn harness() -> Harness {
     let mut s = Session::new();
@@ -16,11 +16,11 @@ fn harness() -> Harness {
     s.execute("home.formatCells", json!({"range": "A3", "style": {"align": {"wrap": true}}})).unwrap();
     s.execute("selection.set", json!({"range": "H20"})).unwrap();
     let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1200.0, 800.0)).build_ui_state(
-        |ui, app: &mut gridcraft_ui_egui::SheetApp| {
+        |ui, app: &mut malu123_ui_egui::SheetApp| {
             app.logic(ui.ctx());
             app.ui(ui);
         },
-        gridcraft_ui_egui::SheetApp::new(s, Default::default()),
+        malu123_ui_egui::SheetApp::new(s, Default::default()),
     );
     h.run_steps(4);
     h

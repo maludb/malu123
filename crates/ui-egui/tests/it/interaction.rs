@@ -2,9 +2,9 @@
 
 use egui::{Event, Key, Modifiers, PointerButton};
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_engine::core::{CellRef, Value};
-use gridcraft_ui_egui::{SheetApp, grid::Geo};
+use malu123_engine::Session;
+use malu123_engine::core::{CellRef, Value};
+use malu123_ui_egui::{SheetApp, grid::Geo};
 use serde_json::json;
 
 fn harness(session: Session) -> egui_kittest::Harness<'static, SheetApp> {
@@ -76,7 +76,7 @@ fn click(h: &mut egui_kittest::Harness<'static, SheetApp>, p: egui::Pos2) {
 
 #[test]
 fn horizontal_scrollbar_pages_and_drags_across_a_wide_sheet() {
-    let mut wb = gridcraft_engine::model::Workbook::new();
+    let mut wb = malu123_engine::model::Workbook::new();
     let sh = wb.sheet_mut(0).unwrap();
     for c in 0..26 {
         sh.set_value(CellRef::new(0, c), Value::text(format!("col {}", c + 1)));
@@ -84,7 +84,7 @@ fn horizontal_scrollbar_pages_and_drags_across_a_wide_sheet() {
     // Column A frozen: a page is the scrolling part only.
     sh.freeze = Some((0, 1));
     let mut s = Session::new();
-    s.add_document(gridcraft_engine::DocState::new(wb, None, "Book1".into()));
+    s.add_document(malu123_engine::DocState::new(wb, None, "Book1".into()));
     let mut h = harness(s);
     let track = h.state().grid.hscroll.expect("the tab bar has a horizontal scrollbar");
     assert!(track.width() >= 200.0, "the scrollbar gets a usable share of the tab bar: {track:?}");
@@ -214,7 +214,7 @@ fn name_box_enter_goes_to_the_typed_cell_not_the_one_below() {
     let mut h = harness(blank());
     h.state_mut().session.run("selection.set", json!({"cell": "C5"})).unwrap();
     h.run_steps(2);
-    h.ctx.memory_mut(|m| m.request_focus(egui::Id::new("gridcraft.name_box")));
+    h.ctx.memory_mut(|m| m.request_focus(egui::Id::new("malu123.name_box")));
     h.run_steps(2);
     h.input_mut().events.push(Event::Key { key: Key::A, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::COMMAND });
     h.input_mut().events.push(Event::Text("A1".into()));
@@ -401,14 +401,13 @@ fn renders_every_ribbon_tab_without_panicking() {
 
 #[test]
 fn language_switch_translates_the_ribbon_and_persists() {
-    use gridcraft_ui_egui::i18n::Language;
+    use malu123_ui_egui::i18n::Language;
     let mut h = harness(blank());
     // English by default whatever the host's locale: only the desktop app reads the system language.
     assert_eq!(h.state().ui.language, Language::En);
     // The language commands are listed with the other UI commands.
     let ctx = h.ctx.clone();
-    let gridcraft_ui_egui::control::Outcome::Done(listed) = gridcraft_ui_egui::control::handle(h.state_mut(), &ctx, "engine.commands", &json!({}))
-    else {
+    let malu123_ui_egui::control::Outcome::Done(listed) = malu123_ui_egui::control::handle(h.state_mut(), &ctx, "engine.commands", &json!({})) else {
         panic!("engine.commands returns a response");
     };
     let ids: Vec<&str> = listed["result"].as_array().into_iter().flatten().filter_map(|c| c["id"].as_str()).collect();
@@ -430,7 +429,7 @@ fn language_switch_translates_the_ribbon_and_persists() {
         h.run_steps(2); // every locale renders the ribbon without panicking
         assert_eq!(h.state().ui.language, language);
         assert_eq!(language.tr("Data"), expected);
-        let restored: gridcraft_ui_egui::UiState = serde_json::from_str(&serde_json::to_string(&h.state().ui).unwrap()).unwrap();
+        let restored: malu123_ui_egui::UiState = serde_json::from_str(&serde_json::to_string(&h.state().ui).unwrap()).unwrap();
         assert_eq!(restored.language, language);
     }
     // Czech spells "Data" as English does, so the Czech table is checked on a label that differs.
@@ -438,7 +437,7 @@ fn language_switch_translates_the_ribbon_and_persists() {
     h.run_steps(2);
     assert_eq!(h.state().ui.language, Language::Cs);
     assert_eq!(Language::Cs.tr("Formulas"), "Vzorce");
-    let restored: gridcraft_ui_egui::UiState = serde_json::from_str(&serde_json::to_string(&h.state().ui).unwrap()).unwrap();
+    let restored: malu123_ui_egui::UiState = serde_json::from_str(&serde_json::to_string(&h.state().ui).unwrap()).unwrap();
     assert_eq!(restored.language, Language::Cs);
     h.state_mut().run("app.language.set", json!({"language": "en"})).unwrap();
     assert_eq!(h.state().ui.language, Language::En);
@@ -558,7 +557,7 @@ fn recommended_charts_dialog_inserts_the_chosen_chart() {
     h.run_steps(2);
     assert!(h.state().dialog.is_none());
     let kinds: Vec<_> = h.state().session.active().unwrap().wb.active().unwrap().charts.iter().map(|c| c.kind).collect();
-    assert_eq!(kinds, [gridcraft_engine::model::ChartKind::Pie]);
+    assert_eq!(kinds, [malu123_engine::model::ChartKind::Pie]);
     assert!(h.state().selected_chart.is_some(), "the new chart is selected");
 
     // Without numbers there is nothing to recommend: a message, no dialog.
@@ -824,8 +823,8 @@ fn column_autocomplete_folds_case_beyond_ascii() {
 
 #[test]
 fn column_autocomplete_can_be_turned_off() {
-    assert!(gridcraft_ui_egui::UiState::default().autocomplete);
-    let old: gridcraft_ui_egui::UiState = serde_json::from_str(r#"{"dark": true}"#).unwrap();
+    assert!(malu123_ui_egui::UiState::default().autocomplete);
+    let old: malu123_ui_egui::UiState = serde_json::from_str(r#"{"dark": true}"#).unwrap();
     assert!(old.autocomplete, "a ui.json written before the setting existed keeps it on");
 
     let mut s = blank();
@@ -845,9 +844,9 @@ fn column_autocomplete_can_be_turned_off() {
 
 /// An .xlsm carrying a VBA project, saved to bytes.
 fn macro_workbook_bytes() -> Vec<u8> {
-    let mut wb = gridcraft_engine::model::Workbook::new();
+    let mut wb = malu123_engine::model::Workbook::new();
     wb.vba_project = Some(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1 fake OLE2 vbaProject".to_vec().into());
-    gridcraft_engine::io::save_bytes(&wb, "macros.xlsm").unwrap()
+    malu123_engine::io::save_bytes(&wb, "macros.xlsm").unwrap()
 }
 
 #[test]
@@ -855,7 +854,7 @@ fn opening_a_macro_workbook_shows_a_notice() {
     // The reader's "macros kept but not executed" warning must reach a dismissible info bar,
     // not be silently dropped (issue #6 follow-up: Excel-style message bar).
     let mut h = harness(blank());
-    let b64 = gridcraft_engine::io::base64_encode(&macro_workbook_bytes());
+    let b64 = malu123_engine::io::base64_encode(&macro_workbook_bytes());
     let res = h.state_mut().session.run("file.open", json!({"name": "macros.xlsm", "base64": b64})).unwrap();
     assert!(
         res.get("warnings").and_then(|w| w.as_array()).is_some_and(|a| a.iter().any(|m| m.as_str().is_some_and(|s| s.contains("macros")))),
@@ -865,7 +864,7 @@ fn opening_a_macro_workbook_shows_a_notice() {
     h.state_mut().show_open_warnings(&res);
     let n = h.state().notice.clone().expect("a notice was shown");
     assert!(n.text.contains("VBA"), "{}", n.text);
-    assert_eq!(n.kind, gridcraft_ui_egui::NoticeKind::Warning);
+    assert_eq!(n.kind, malu123_ui_egui::NoticeKind::Warning);
     assert_eq!(n.action.as_ref().map(|a| a.1.as_str()), Some("macros"), "action opens the Macros dialog");
 
     // The notice bar renders without panic; `ui.notice` surfaces it; dismissing clears it.
@@ -883,7 +882,7 @@ fn dropped_macro_warning_never_promises_to_keep_macros() {
     for w in ["macros (VBA project) reference a missing part and were dropped", "macros (VBA project) could not be read and were dropped: bad zip"] {
         h.state_mut().show_open_warnings(&json!({"warnings": [w]}));
         let n = h.state().notice.clone().unwrap();
-        assert_eq!(n.kind, gridcraft_ui_egui::NoticeKind::Warning);
+        assert_eq!(n.kind, malu123_ui_egui::NoticeKind::Warning);
         assert!(n.text.contains("dropped") && !n.text.contains("keeps them"), "{}", n.text);
     }
     h.state_mut().show_open_warnings(&json!({"warnings": ["macros (VBA project) were kept but not executed"]}));
@@ -895,7 +894,7 @@ fn plain_open_warning_becomes_an_info_notice() {
     let mut h = harness(blank());
     h.state_mut().show_open_warnings(&json!({"warnings": ["links to external workbooks are not supported"]}));
     let n = h.state().notice.clone().unwrap();
-    assert_eq!(n.kind, gridcraft_ui_egui::NoticeKind::Info);
+    assert_eq!(n.kind, malu123_ui_egui::NoticeKind::Info);
     assert!(n.action.is_none());
     assert!(n.text.contains("external"));
     // No warnings → no notice, no panic.
@@ -906,7 +905,7 @@ fn plain_open_warning_becomes_an_info_notice() {
 #[test]
 fn macros_dialog_lists_vba_and_scripts() {
     let mut s = blank();
-    let mut wb = gridcraft_engine::model::Workbook::new();
+    let mut wb = malu123_engine::model::Workbook::new();
     wb.vba_project = Some(vec![0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1].into());
     s.active_mut().unwrap().wb = std::sync::Arc::new(wb);
     let mut h = harness(s);
@@ -922,7 +921,7 @@ fn macros_dialog_lists_vba_and_scripts() {
 #[test]
 fn status_bar_shows_macro_badge() {
     let mut s = blank();
-    let mut wb = gridcraft_engine::model::Workbook::new();
+    let mut wb = malu123_engine::model::Workbook::new();
     wb.vba_project = Some(vec![0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1].into());
     s.active_mut().unwrap().wb = std::sync::Arc::new(wb);
     // Rendering the status bar must not panic with a VBA project present.

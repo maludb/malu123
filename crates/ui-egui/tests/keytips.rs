@@ -2,10 +2,10 @@
 
 use egui::{Event, Key, Modifiers, PointerButton, os::OperatingSystem};
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_engine::core::{CellRef, Value};
-use gridcraft_engine::model::HAlign;
-use gridcraft_ui_egui::SheetApp;
+use malu123_engine::Session;
+use malu123_engine::core::{CellRef, Value};
+use malu123_engine::model::HAlign;
+use malu123_ui_egui::SheetApp;
 use serde_json::json;
 
 type Harness = egui_kittest::Harness<'static, SheetApp>;
@@ -392,7 +392,7 @@ fn tab_letters_switch_to_their_ribbon_tabs() {
 
 #[test]
 fn f_opens_the_file_view_and_its_letters_still_run() {
-    use gridcraft_ui_egui::backstage::Page;
+    use malu123_ui_egui::backstage::Page;
     let mut h = harness(blank());
     sequence(&mut h, &[Key::F], false);
     assert_eq!(h.state().backstage.as_ref().map(|b| b.page), Some(Page::Home), "F opens the File view on Home");
@@ -512,7 +512,7 @@ fn pending_sequences_are_silent_no_ops() {
 fn pending_sequences_go_live_when_the_command_lands() {
     // The command lands in the catalog (here: a test-registered stand-in).
     // The sequence must run it with no table edit.
-    gridcraft_engine::register_test_command("insert.equation", |s, _| {
+    malu123_engine::register_test_command("insert.equation", |s, _| {
         s.execute("cell.set", json!({"cell": "Z9", "input": "live"}))?;
         Ok(json!({}))
     });
@@ -634,7 +634,7 @@ fn color_palette_navigates_with_arrows_and_enter_applies() {
 
 #[test]
 fn every_sequence_terminates_without_panicking() {
-    use gridcraft_ui_egui::keytips::keytip_table::SEQUENCES;
+    use malu123_ui_egui::keytips::keytip_table::SEQUENCES;
     for (seq, _entry) in SEQUENCES {
         let mut h = harness(blank());
         key(&mut h, Key::F10); // arm

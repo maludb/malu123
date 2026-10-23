@@ -1,7 +1,7 @@
 //! Title bar (Quick Access Toolbar), ribbon tabs and ribbon groups, and keyboard shortcuts.
 
 use egui::{Align2, Color32, Key, Modifiers, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
-use gridcraft_engine::model::{HAlign, Style, VAlign};
+use malu123_engine::model::{HAlign, Style, VAlign};
 use serde_json::json;
 
 use crate::SheetApp;
@@ -357,7 +357,7 @@ fn active_style(app: &SheetApp) -> Style {
 }
 
 fn theme_colors(app: &SheetApp) -> [u32; 12] {
-    app.session.active().map(|d| d.wb.theme.colors).unwrap_or(gridcraft_engine::model::Theme::default().colors)
+    app.session.active().map(|d| d.wb.theme.colors).unwrap_or(malu123_engine::model::Theme::default().colors)
 }
 
 /// Runs a command from a ribbon click (menu-style: no params may open a dialog).
@@ -764,7 +764,7 @@ fn home(app: &mut SheetApp, ui: &mut Ui) {
                 }
             });
             let fill = app.grid.last_fill.clone();
-            let fill_c = gridcraft_engine::model::Color::from_hex(&fill).and_then(|c| c.resolve(&Default::default())).map(theme::color32);
+            let fill_c = malu123_engine::model::Color::from_hex(&fill).and_then(|c| c.resolve(&Default::default())).map(theme::color32);
             let (f, fa) = split_button(ui, Icon::Fill, fill_c, "Fill Color");
             control_keytip(app, ui, &fa, "home.fillColor");
             if f {
@@ -784,7 +784,7 @@ fn home(app: &mut SheetApp, ui: &mut Ui) {
                     }
                 });
             let fc = app.grid.last_font_color.clone();
-            let fc_c = gridcraft_engine::model::Color::from_hex(&fc).and_then(|c| c.resolve(&Default::default())).map(theme::color32);
+            let fc_c = malu123_engine::model::Color::from_hex(&fc).and_then(|c| c.resolve(&Default::default())).map(theme::color32);
             let (c, ca) = split_button(ui, Icon::FontColor, fc_c, "Font Color");
             control_keytip(app, ui, &ca, "home.fontColor");
             if c {
@@ -1187,7 +1187,7 @@ fn size_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let t = Tokens::get(ui.ctx());
     let size = st.font.size;
     let current = if size.fract() == 0.0 { format!("{}", size as i32) } else { format!("{size}") };
-    let field = egui::Id::new("gridcraft.font_size_box");
+    let field = egui::Id::new("malu123.font_size_box");
     let draft = field.with("draft");
     let mut text = ui.data_mut(|d| d.get_temp::<String>(draft)).unwrap_or_else(|| current.clone());
     // One frame like the Font name box beside it (same fill, border, height and corners), with the
@@ -1248,7 +1248,7 @@ fn size_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
 
 fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let code = st.num_fmt.as_str().to_string();
-    let kind = gridcraft_engine::display::number_format(&code).kind();
+    let kind = malu123_engine::display::number_format(&code).kind();
     let current = format!("{kind:?}");
     let lang = app.ui.language;
     let sample = app.session.active().and_then(|d| d.wb.active().map(|sh| sh.value(d.selection.active))).unwrap_or_default();
@@ -1259,8 +1259,8 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let items: Vec<(&str, String)> = names
         .iter()
         .map(|n| {
-            let code = gridcraft_engine::cmd::format::format_code_for(n);
-            let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, code, &d.wb).text).unwrap_or_default();
+            let code = malu123_engine::cmd::format::format_code_for(n);
+            let preview = app.session.active().map(|d| malu123_engine::display::format(&sample, code, &d.wb).text).unwrap_or_default();
             (*n, format!("{:<12}   {preview}", lang.tr(n)))
         })
         .chain(std::iter::once(("__more", format!("{:>12}", lang.tr("More Number Formats…")))))
@@ -1386,9 +1386,9 @@ fn table_gallery(app: &mut SheetApp, ui: &mut Ui, cmd: &str) {
     }
 }
 
-fn paint_table_swatch(ui: &Ui, r: Rect, wb: &gridcraft_engine::model::Workbook, style: &str) {
-    let lk = gridcraft_engine::tables::look(style);
-    let res = |c: Option<gridcraft_engine::model::Color>| c.and_then(|c| c.resolve(&wb.theme)).map(theme::color32);
+fn paint_table_swatch(ui: &Ui, r: Rect, wb: &malu123_engine::model::Workbook, style: &str) {
+    let lk = malu123_engine::tables::look(style);
+    let res = |c: Option<malu123_engine::model::Color>| c.and_then(|c| c.resolve(&wb.theme)).map(theme::color32);
     let p = ui.painter();
     p.rect_filled(r, 0.0, Color32::WHITE);
     let rows = 5;
@@ -1459,13 +1459,13 @@ fn cell_style_gallery(app: &mut SheetApp, ui: &mut Ui) {
         ui.label(egui::RichText::new(*g).strong());
         egui::Grid::new(("csg", *g)).spacing(vec2(4.0, 4.0)).show(ui, |ui| {
             for (i, n) in names.iter().enumerate() {
-                let st = gridcraft_engine::cmd::format::builtin_cell_style(n, &wb.theme).unwrap_or_default();
+                let st = malu123_engine::cmd::format::builtin_cell_style(n, &wb.theme).unwrap_or_default();
                 let (r, resp) = ui.allocate_exact_size(vec2(82.0, 24.0), Sense::click());
                 let fill = st
                     .fill
                     .fg
                     .resolve(&wb.theme)
-                    .filter(|_| st.fill.pattern != gridcraft_engine::model::PatternType::None)
+                    .filter(|_| st.fill.pattern != malu123_engine::model::PatternType::None)
                     .map(theme::color32)
                     .unwrap_or(Color32::WHITE);
                 ui.painter().rect_filled(r, 0.0, fill);
@@ -1744,7 +1744,7 @@ fn page_layout(app: &mut SheetApp, ui: &mut Ui) {
     let th = big_button(ui, Icon::Theme, "Themes", "Themes", true);
     anchor_keytip(app, ui, &th, &["pageLayout.theme"]);
     egui::Popup::menu(&th).show(|ui| {
-        for (name, colors) in gridcraft_engine::cmd::view::themes() {
+        for (name, colors) in malu123_engine::cmd::view::themes() {
             ui.horizontal(|ui| {
                 for c in colors.iter().skip(4).take(6) {
                     let (r, _) = ui.allocate_exact_size(vec2(12.0, 12.0), Sense::hover());
@@ -1924,7 +1924,7 @@ fn formulas(app: &mut SheetApp, ui: &mut Ui) {
         egui::Popup::menu(&r).open_memory(popup_command(forced_c, r.clicked())).show(|ui| {
             ui.set_max_height(420.0);
             egui::ScrollArea::vertical().show(ui, |ui| {
-                for f in gridcraft_engine::cmd::formulas::function_list() {
+                for f in malu123_engine::cmd::formulas::function_list() {
                     if f["category"].as_str() == Some(cat)
                         && let Some(n) = f["name"].as_str()
                     {
@@ -2268,7 +2268,7 @@ fn view(app: &mut SheetApp, ui: &mut Ui) {
     let s = app.session.active().and_then(|d| d.wb.active().map(|s| (s.show_gridlines, s.show_headings))).unwrap_or((true, true));
     let lang = app.ui.language;
     let page_layout =
-        app.session.active().and_then(|d| d.wb.active().map(|s| s.view == gridcraft_engine::model::SheetViewMode::PageLayout)).unwrap_or(false);
+        app.session.active().and_then(|d| d.wb.active().map(|s| s.view == malu123_engine::model::SheetViewMode::PageLayout)).unwrap_or(false);
     // Two columns of two, as in Excel's Show group: four stacked rows overflow the ribbon body.
     ui.vertical(|ui| {
         // Rulers exist only in Page Layout view.
@@ -2400,7 +2400,7 @@ fn automate(app: &mut SheetApp, ui: &mut Ui) {
     if __k.clicked() {
         app.open_dialog("commandSearch", json!({}));
     }
-    let __k = big_button(ui, Icon::Script, "Agent\nControl", "How agents drive GridCraft (MCP / control channel)", false);
+    let __k = big_button(ui, Icon::Script, "Agent\nControl", "How agents drive Malu123 (MCP / control channel)", false);
     control_keytip(app, ui, &__k, "agents");
     if __k.clicked() {
         app.open_dialog("agents", json!({}));
@@ -2410,7 +2410,7 @@ fn automate(app: &mut SheetApp, ui: &mut Ui) {
     if __k.clicked() {
         app.open_dialog("journal", json!({}));
     }
-    let __k = big_button(ui, Icon::Script, "About\nGridCraft", "Version, contributors and the AI models that helped", false);
+    let __k = big_button(ui, Icon::Script, "About\nMalu123", "Version, contributors and the AI models that helped", false);
     control_keytip(app, ui, &__k, "about");
     if __k.clicked() {
         app.open_dialog("about", json!({}));
@@ -2427,7 +2427,7 @@ fn table_design(app: &mut SheetApp, ui: &mut Ui) {
     };
     ui.vertical(|ui| {
         ui.label(egui::RichText::new("Table Name:").small());
-        let field = egui::Id::new(("gridcraft.table_name", &tname));
+        let field = egui::Id::new(("malu123.table_name", &tname));
         if let Some(name) = crate::widgets::committed_text(ui, field, &tname, Some(120.0))
             && name != tname
         {
@@ -2671,8 +2671,8 @@ pub fn shortcut(app: &mut SheetApp, key: Key, m: Modifiers) {
                 .session
                 .active()
                 .map(|d| {
-                    let today = gridcraft_engine::core::date::serial_in_system(d.wb.date_system, gridcraft_engine::calc::now_serial()).floor();
-                    gridcraft_engine::display::format(&gridcraft_engine::core::Value::Number(today), "m/d/yyyy", &d.wb).text
+                    let today = malu123_engine::core::date::serial_in_system(d.wb.date_system, malu123_engine::calc::now_serial()).floor();
+                    malu123_engine::display::format(&malu123_engine::core::Value::Number(today), "m/d/yyyy", &d.wb).text
                 })
                 .unwrap_or_default();
             app.begin_edit(Some(text), false);
@@ -2797,8 +2797,8 @@ fn whole_lines(app: &SheetApp) -> Option<bool> {
 #[cfg(test)]
 mod accounting_symbol_tests {
     use super::*;
-    use gridcraft_engine::core::{DateSystem, Value};
-    use gridcraft_engine::numfmt::{NumberFormat, format_value};
+    use malu123_engine::core::{DateSystem, Value};
+    use malu123_engine::numfmt::{NumberFormat, format_value};
 
     #[test]
     fn accounting_dropdown_offers_the_issue_currencies_with_excel_codes() {

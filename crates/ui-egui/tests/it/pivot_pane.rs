@@ -1,8 +1,8 @@
 //! Pivot field buttons use the surface color for the active theme.
 
 use egui::{Color32, RawInput, Rect, Shape, pos2, vec2};
-use gridcraft_engine::Session;
-use gridcraft_ui_egui::{SheetApp, theme};
+use malu123_engine::Session;
+use malu123_ui_egui::{SheetApp, theme};
 use serde_json::json;
 
 fn render_pivot_field_buttons(dark: bool) -> Vec<Shape> {

@@ -1,6 +1,6 @@
-# GridCraft MCP server
+# Malu123 MCP server
 
-`gridcraft-cli mcp` exposes GridCraft to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io):
+`malu123-cli mcp` exposes Malu123 to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io):
 newline-delimited JSON-RPC 2.0 on stdin/stdout (protocol `2025-06-18`; `2025-03-26` and `2024-11-05` clients are
 answered in their own version). Logs go to stderr.
 
@@ -8,15 +8,15 @@ Two backends:
 
 | Mode | Command | What it drives |
 |---|---|---|
-| Headless (default) | `gridcraft-cli mcp [--in book.xlsx \| --sample budget]` | An in-process engine session — no window. |
-| Remote | `gridcraft-cli mcp --connect 7979` | A running app started with `gridcraft --control 7979` (TCP JSON lines on `127.0.0.1`). |
+| Headless (default) | `malu123-cli mcp [--in book.xlsx \| --sample budget]` | An in-process engine session — no window. |
+| Remote | `malu123-cli mcp --connect 7979` | A running app started with `malu123 --control 7979` (TCP JSON lines on `127.0.0.1`). |
 
 ## Claude Code
 
 ```sh
-claude mcp add gridcraft -- gridcraft-cli mcp
+claude mcp add malu123 -- malu123-cli mcp
 # or drive the desktop app you are looking at:
-claude mcp add gridcraft-app -- gridcraft-cli mcp --connect 7979
+claude mcp add malu123-app -- malu123-cli mcp --connect 7979
 ```
 
 JSON config (`.mcp.json`, Claude Desktop, other clients):
@@ -24,8 +24,8 @@ JSON config (`.mcp.json`, Claude Desktop, other clients):
 ```json
 {
   "mcpServers": {
-    "gridcraft": {
-      "command": "gridcraft-cli",
+    "malu123": {
+      "command": "malu123-cli",
       "args": ["mcp"]
     }
   }
@@ -63,9 +63,9 @@ methods `-32601`.
 
 ## Resources
 
-- `gridcraft://workbook` — `document.inspect` of the active workbook.
-- `gridcraft://commands` — every command with its parameter docs.
-- `gridcraft://functions` — every worksheet function.
+- `malu123://workbook` — `document.inspect` of the active workbook.
+- `malu123://commands` — every command with its parameter docs.
+- `malu123://functions` — every worksheet function.
 
 `prompts/list` returns an empty list.
 
@@ -81,7 +81,7 @@ methods `-32601`.
 
 ## Embedding
 
-`gridcraft-mcp` is a library: `Server::new(Box::new(Headless::new()))` or
+`malu123-mcp` is a library: `Server::new(Box::new(Headless::new()))` or
 `Server::new(Box::new(Remote::connect(&control_addr("7979"))?))`, then `Server::serve(stdin, stdout)` or
 `Server::handle_line(line) -> Option<String>`. Implement the `Backend` trait (`call(method, params)`) to drive another
 host.

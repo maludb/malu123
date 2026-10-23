@@ -3,8 +3,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::fmt::Write as _;
 
-use gridcraft_core::{CellError, CellRef, MAX_COLS, MAX_ROWS, RangeRef, Value};
-use gridcraft_model::{
+use malu123_core::{CellError, CellRef, MAX_COLS, MAX_ROWS, RangeRef, Value};
+use malu123_model::{
     Cell, CfOperator, CfRule, CfValueKind, Color, CondFormat, ErrorStyle, FilterCriterion, LineInfo, NoteBox, NoteCorner, Orientation, Sheet,
     SparklineKind, Style, Table, TotalsFn, Validation, ValidationKind, Workbook, default_icon_thresholds, icon_count,
 };
@@ -40,7 +40,7 @@ fn cf_op_name(op: CfOperator) -> &'static str {
 fn table_name(name: &str, used: &mut HashSet<String>, n: u32) -> String {
     let mut s: String =
         name.chars().enumerate().map(|(i, c)| if c.is_alphanumeric() || c == '_' || c == '.' || (i == 0 && c == '\\') { c } else { '_' }).collect();
-    if s.is_empty() || !s.starts_with(|c: char| c.is_alphabetic() || c == '_' || c == '\\') || gridcraft_core::CellRef::parse(&s).is_some() {
+    if s.is_empty() || !s.starts_with(|c: char| c.is_alphabetic() || c == '_' || c == '\\') || malu123_core::CellRef::parse(&s).is_some() {
         s = format!("Table{n}");
     }
     let mut out = s.clone();
@@ -74,7 +74,7 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
     let mut rels = Rels::default();
     let Some(sheet) = wb.sheet(si) else { return (String::new(), rels) };
     let nstyles = wb.styles.len() as u32;
-    let sid = |s: gridcraft_model::StyleId| if s.0 < nstyles { s.0 } else { 0 };
+    let sid = |s: malu123_model::StyleId| if s.0 < nstyles { s.0 } else { 0 };
 
     // A table's dropdown filter is kept in `sheet.autofilter`, not in `Table::filter` (the
     // engine's only live filter state, which the reader also fills). Where the two coincide,
@@ -178,7 +178,7 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
     if sheet.right_to_left {
         s.push_str(" rightToLeft=\"1\"");
     }
-    if sheet.view != gridcraft_model::SheetViewMode::Normal {
+    if sheet.view != malu123_model::SheetViewMode::Normal {
         let _ = write!(s, " view=\"{}\"", sheet.view.as_str());
     }
     if sheet.zoom != 100 && (10..=400).contains(&sheet.zoom) {
@@ -207,8 +207,8 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
                 s,
                 " topLeftCell=\"{}\" activePane=\"{pane}\" state=\"frozen\"/>",
                 CellRef::new(
-                    rows.max(sheet.view_top_left.row).min(gridcraft_core::MAX_ROWS - 1),
-                    cols.max(sheet.view_top_left.col).min(gridcraft_core::MAX_COLS - 1)
+                    rows.max(sheet.view_top_left.row).min(malu123_core::MAX_ROWS - 1),
+                    cols.max(sheet.view_top_left.col).min(malu123_core::MAX_COLS - 1)
                 )
                 .a1()
             );
@@ -224,11 +224,11 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
     let max_row_outline = sheet.rows.values().map(|r| r.outline).max().unwrap_or(0);
     let max_col_outline = sheet.cols.values().map(|r| r.outline).max().unwrap_or(0);
     s.push_str("<sheetFormatPr");
-    if (sheet.default_col_width - gridcraft_model::DEFAULT_COL_WIDTH).abs() > 0.01 {
+    if (sheet.default_col_width - malu123_model::DEFAULT_COL_WIDTH).abs() > 0.01 {
         let _ = write!(s, " defaultColWidth=\"{}\"", num(px_to_col_width(sheet.default_col_width)));
     }
     let _ = write!(s, " defaultRowHeight=\"{}\"", num(px_to_pt(sheet.default_row_height)));
-    if (sheet.default_row_height - gridcraft_model::DEFAULT_ROW_HEIGHT).abs() > 0.01 {
+    if (sheet.default_row_height - malu123_model::DEFAULT_ROW_HEIGHT).abs() > 0.01 {
         s.push_str(" customHeight=\"1\"");
     }
     if max_row_outline > 0 {
@@ -265,7 +265,7 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
             s.push_str("/>");
         };
         for (&c, info) in &sheet.cols {
-            if c >= gridcraft_core::MAX_COLS {
+            if c >= malu123_core::MAX_COLS {
                 continue;
             }
             run = match run {
@@ -635,7 +635,7 @@ pub fn write_sheet(wb: &Workbook, si: usize, selected: bool, out: &mut Out) -> (
                 SparklineKind::WinLoss => " type=\"stacked\"",
             };
             let src =
-                if sp.source.contains('!') { sp.source.clone() } else { format!("{}!{}", gridcraft_formula::quote_sheet(&sheet.name), sp.source) };
+                if sp.source.contains('!') { sp.source.clone() } else { format!("{}!{}", malu123_formula::quote_sheet(&sheet.name), sp.source) };
             let color = if sp.color == Color::Auto { "rgb=\"FF376092\"".to_string() } else { color_attrs(&sp.color) };
             let _ = write!(
                 s,
@@ -658,11 +658,11 @@ fn write_cell(
     s: &mut String,
     c: CellRef,
     cell: Option<&Cell>,
-    picture: Option<&std::sync::Arc<gridcraft_model::CellPicture>>,
+    picture: Option<&std::sync::Arc<malu123_model::CellPicture>>,
     ov: Option<&String>,
     extra: Option<&Value>,
     dynamic: Option<&RangeRef>,
-    sid: &dyn Fn(gridcraft_model::StyleId) -> u32,
+    sid: &dyn Fn(malu123_model::StyleId) -> u32,
     out: &mut Out,
 ) {
     let style = cell.map(|x| sid(x.style)).unwrap_or(0);
@@ -1028,7 +1028,7 @@ fn autofilter_xml(range: RangeRef, criteria: &[(u32, FilterCriterion)], out: &mu
                 let _ = write!(s, "<dynamicFilter type=\"{}\"/>", if *above { "aboveAverage" } else { "belowAverage" });
             }
             FilterCriterion::FillColor(c) => {
-                let st = Style { fill: gridcraft_model::Fill::solid(*c), ..Default::default() };
+                let st = Style { fill: malu123_model::Fill::solid(*c), ..Default::default() };
                 let _ = write!(s, "<colorFilter dxfId=\"{}\"/>", dxf_id(&mut out.dxfs, &st));
             }
             FilterCriterion::FontColor(c) => {
@@ -1157,7 +1157,7 @@ fn thread_ids(sheet: &Sheet, si: usize) -> BTreeMap<CellRef, Vec<String>> {
 
 fn comments_xml(sheet: &Sheet, ids: &BTreeMap<CellRef, Vec<String>>) -> String {
     // A threaded comment's legacy note is authored by `tc={thread id}`.
-    let author_of = |cell: &CellRef, c: &gridcraft_model::Comment| match ids.get(cell).and_then(|v| v.first()) {
+    let author_of = |cell: &CellRef, c: &malu123_model::Comment| match ids.get(cell).and_then(|v| v.first()) {
         Some(id) => format!("tc={id}"),
         None => c.author.clone(),
     };
@@ -1255,11 +1255,11 @@ fn threaded_xml(sheet: &Sheet, ids: &BTreeMap<CellRef, Vec<String>>, persons: &m
 
 /// A protection password hash as attributes, each name preceded by `prefix` (see
 /// [`crate::sheet_read::read_password`]).
-pub(crate) fn password_attrs(h: &gridcraft_model::PasswordHash, prefix: &str) -> String {
+pub(crate) fn password_attrs(h: &malu123_model::PasswordHash, prefix: &str) -> String {
     let name = |base: &str| crate::sheet_read::password_attr(prefix, base);
     match h {
-        gridcraft_model::PasswordHash::Legacy(h) => format!(" {}=\"{h:04X}\"", name("password")),
-        gridcraft_model::PasswordHash::Iterated { algorithm, hash, salt, spin_count } => format!(
+        malu123_model::PasswordHash::Legacy(h) => format!(" {}=\"{h:04X}\"", name("password")),
+        malu123_model::PasswordHash::Iterated { algorithm, hash, salt, spin_count } => format!(
             " {}=\"{}\" {}=\"{}\" {}=\"{}\" {}=\"{spin_count}\"",
             name("algorithmName"),
             esc_attr(algorithm),

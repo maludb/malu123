@@ -2,8 +2,8 @@
 //! a window stretched to the screen's height.
 
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_ui_egui::SheetApp;
+use malu123_engine::Session;
+use malu123_ui_egui::SheetApp;
 use serde_json::json;
 
 #[test]

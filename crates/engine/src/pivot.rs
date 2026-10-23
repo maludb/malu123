@@ -8,10 +8,10 @@
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 
-use gridcraft_core::date::datetime_from_serial;
-pub use gridcraft_core::quote_sheet;
-use gridcraft_core::{CellError, CellRef, MAX_COLS, MAX_ROWS, RangeRef, Value, split_sheet};
-use gridcraft_model::*;
+use malu123_core::date::datetime_from_serial;
+pub use malu123_core::quote_sheet;
+use malu123_core::{CellError, CellRef, MAX_COLS, MAX_ROWS, RangeRef, Value, split_sheet};
+use malu123_model::*;
 
 use crate::pivot_calc::CalcSet;
 
@@ -50,7 +50,7 @@ impl Source {
 
 /// Absolute reference text for a range on a sheet: `Sheet1!$A$1:$E$20`.
 pub fn range_text(sheet_name: &str, r: RangeRef) -> String {
-    let abs = |c: CellRef| format!("${}${}", gridcraft_core::col_to_letters(c.col), c.row as u64 + 1);
+    let abs = |c: CellRef| format!("${}${}", malu123_core::col_to_letters(c.col), c.row as u64 + 1);
     format!("{}!{}:{}", quote_sheet(sheet_name), abs(r.start), abs(r.end))
 }
 
@@ -1492,7 +1492,7 @@ pub fn parse_chart_link(link: &str) -> Option<(String, String)> {
     };
     let (sheet, name) = t.rsplit_once('!')?;
     let sheet = sheet.trim();
-    let sheet = gridcraft_core::unquote_sheet(sheet);
+    let sheet = malu123_core::unquote_sheet(sheet);
     let name = name.trim();
     if sheet.is_empty() || name.is_empty() {
         return None;
@@ -1509,7 +1509,7 @@ pub fn links_to(link: &str, sheet: &str, pivot: &str) -> bool {
 fn rows_ref(sheet: &str, origin: CellRef, col: u32, rows: &[u32]) -> Option<String> {
     let q = quote_sheet(sheet);
     let c = origin.col.checked_add(col)?;
-    let letters = gridcraft_core::col_to_letters(c);
+    let letters = malu123_core::col_to_letters(c);
     let mut parts: Vec<String> = Vec::new();
     let mut i = 0;
     while let Some(&start) = rows.get(i) {

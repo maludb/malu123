@@ -1,17 +1,17 @@
 [package]
-name = "gridcraft-calc"
+name = "malu123-calc"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "GridCraft calculation engine: dependency graph, recalculation, evaluator, dynamic arrays"
+description = "Malu123 calculation engine: dependency graph, recalculation, evaluator, dynamic arrays"
 
 [lints]
 workspace = true
 
 [dependencies]
-gridcraft-core = { workspace = true }
-gridcraft-formula = { workspace = true }
-gridcraft-functions = { workspace = true }
-gridcraft-numfmt = { workspace = true }
-gridcraft-model = { workspace = true }
+malu123-core = { workspace = true }
+malu123-formula = { workspace = true }
+malu123-functions = { workspace = true }
+malu123-numfmt = { workspace = true }
+malu123-model = { workspace = true }
 log = { workspace = true }

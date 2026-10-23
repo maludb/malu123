@@ -1,0 +1,23 @@
+[package]
+name = "malu123-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Malu123 command line: inspect, convert, evaluate, script and serve MCP without a window"
+publish = false
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "malu123-cli"
+path = "src/main.rs"
+
+[dependencies]
+malu123-engine = { workspace = true }
+malu123-mcp = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+# `check`: validating the packages Malu123 writes (content types, relationships).
+zip = { workspace = true }
+quick-xml = { workspace = true }

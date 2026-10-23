@@ -1,9 +1,9 @@
 //! Pulls chart data (names, categories, values, formats, colours) out of a workbook.
 
-use gridcraft_calc::evaluate;
-use gridcraft_core::{CellRef, RangeRef, Value, category_levels, number_to_text};
-use gridcraft_model::{Chart, ChartKind, Theme, Workbook, style::apply_tint};
-use gridcraft_numfmt::{NumberFormat, format_value};
+use malu123_calc::evaluate;
+use malu123_core::{CellRef, RangeRef, Value, category_levels, number_to_text};
+use malu123_model::{Chart, ChartKind, Theme, Workbook, style::apply_tint};
+use malu123_numfmt::{NumberFormat, format_value};
 
 use crate::{ChartData, Rgba, SeriesData, TrendlineData};
 
@@ -41,7 +41,7 @@ fn parse_ref(wb: &Workbook, sheet: usize, formula: &str) -> Option<(usize, Range
     let (sh, addr) = match f.rfind('!') {
         Some(i) => {
             let name = f.get(..i)?.trim();
-            let name = gridcraft_core::unquote_sheet(name);
+            let name = malu123_core::unquote_sheet(name);
             (wb.sheet_index(&name)?, f.get(i + 1..)?)
         }
         None => (sheet, f),

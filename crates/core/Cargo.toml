@@ -1,9 +1,9 @@
 [package]
-name = "gridcraft-core"
+name = "malu123-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "GridCraft core types: cell addresses, values, errors, date serials"
+description = "Malu123 core types: cell addresses, values, errors, date serials"
 
 [lints]
 workspace = true

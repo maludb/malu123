@@ -19,7 +19,7 @@ SKIP='^(README\.md|NOTICE|LICENSE-MIT|LICENSE-APACHE|docs/malu123/.*|scripts/ren
 if [ -d docs/brand ]; then git rm -rq docs/brand; fi
 
 # 2. paths
-git ls-files | grep -i gridcraft | sort -r | while read -r old; do
+{ git ls-files | grep -i gridcraft || true; } | sort -r | while read -r old; do
   new=$(printf '%s' "$old" | sed -e 's/ai\.storyteller\.gridcraft/org.maluos.malu123/g' -e 's/gridcraft/malu123/g')
   [ "$old" = "$new" ] && continue
   mkdir -p "$(dirname "$new")"

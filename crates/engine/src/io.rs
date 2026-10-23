@@ -2,12 +2,12 @@
 
 use std::fmt::Write as _;
 
-use gridcraft_core::{CellRef, RangeRef};
-use gridcraft_model::{Sheet, Workbook};
+use malu123_core::{CellRef, RangeRef};
+use malu123_model::{Sheet, Workbook};
 
 use crate::{EngineError, Result};
 
-/// File formats GridCraft reads or writes.
+/// File formats Malu123 reads or writes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileKind {
     Xlsx,
@@ -44,7 +44,7 @@ pub const PASSWORD_REQUIRED: &str = "is password-protected. Enter its password t
 /// The error for a wrong password contains this.
 pub const WRONG_PASSWORD: &str = "The password is incorrect.";
 /// The first open warning of a workbook decrypted with its password.
-pub const DECRYPTED_NOTICE: &str = "This workbook was password-protected. GridCraft saves it without the password.";
+pub const DECRYPTED_NOTICE: &str = "This workbook was password-protected. Malu123 saves it without the password.";
 
 /// Parses a file's bytes into a workbook. `name` picks the format by extension when the bytes
 /// don't say. An encrypted workbook needs [`open_bytes_with_password`].
@@ -62,19 +62,19 @@ pub fn open_bytes_with_password(name: &str, bytes: &[u8], password: Option<&str>
 /// the text it holds, with no number, date or boolean conversion (identifiers such as GTINs, SKUs
 /// and ZIP codes survive). It does not apply to other formats.
 pub fn open_bytes_with(name: &str, bytes: &[u8], password: Option<&str>, csv_as_text: bool) -> Result<(Workbook, Vec<String>)> {
-    if gridcraft_xlsx::sniff(bytes) != gridcraft_xlsx::Format::Encrypted {
+    if malu123_xlsx::sniff(bytes) != malu123_xlsx::Format::Encrypted {
         let (mut wb, warnings) = open_plain(name, bytes, csv_as_text)?;
         fit_imported_rows(&mut wb);
         return Ok((wb, warnings));
     }
     // A scheme no password opens is said straight away, rather than after asking for one.
-    let decrypt_error = |e: gridcraft_xlsx::DecryptError| EngineError::Other(decrypt_message(name, e));
+    let decrypt_error = |e: malu123_xlsx::DecryptError| EngineError::Other(decrypt_message(name, e));
     let Some(password) = password else {
-        gridcraft_xlsx::check_encryption(bytes).map_err(decrypt_error)?;
+        malu123_xlsx::check_encryption(bytes).map_err(decrypt_error)?;
         return Err(EngineError::Other(format!("'{name}' {PASSWORD_REQUIRED}")));
     };
-    let plain = gridcraft_xlsx::decrypt(bytes, password).map_err(decrypt_error)?;
-    if gridcraft_xlsx::sniff(&plain) == gridcraft_xlsx::Format::Encrypted {
+    let plain = malu123_xlsx::decrypt(bytes, password).map_err(decrypt_error)?;
+    if malu123_xlsx::sniff(&plain) == malu123_xlsx::Format::Encrypted {
         return Err(EngineError::Other(format!("We can't open '{name}': the encrypted file is damaged (it holds another encrypted file).")));
     }
     let (mut wb, mut warnings) = open_plain(name, &plain, csv_as_text)?;
@@ -108,48 +108,48 @@ fn fit_imported_rows(wb: &mut Workbook) {
 }
 
 /// What to tell the user when an encrypted workbook can't be decrypted. Never quotes the password.
-fn decrypt_message(name: &str, e: gridcraft_xlsx::DecryptError) -> String {
+fn decrypt_message(name: &str, e: malu123_xlsx::DecryptError) -> String {
     match e {
-        gridcraft_xlsx::DecryptError::WrongPassword => format!("{WRONG_PASSWORD} Check that Caps Lock is off and try again."),
-        gridcraft_xlsx::DecryptError::Unsupported(scheme) => {
-            format!("'{name}' uses {scheme} encryption, which GridCraft can't open yet. Remove the password in Excel and try again.")
+        malu123_xlsx::DecryptError::WrongPassword => format!("{WRONG_PASSWORD} Check that Caps Lock is off and try again."),
+        malu123_xlsx::DecryptError::Unsupported(scheme) => {
+            format!("'{name}' uses {scheme} encryption, which Malu123 can't open yet. Remove the password in Excel and try again.")
         }
-        gridcraft_xlsx::DecryptError::Malformed(detail) => format!("We can't open '{name}': the encrypted file is damaged ({detail})."),
+        malu123_xlsx::DecryptError::Malformed(detail) => format!("We can't open '{name}': the encrypted file is damaged ({detail})."),
     }
 }
 
 /// Parses bytes that aren't encrypted.
 fn open_plain(name: &str, bytes: &[u8], csv_as_text: bool) -> Result<(Workbook, Vec<String>)> {
     let kind = FileKind::from_path(name);
-    let sniffed = gridcraft_xlsx::sniff(bytes);
-    if sniffed == gridcraft_xlsx::Format::Xls {
-        let (wb, report) = gridcraft_xlsx::read_xls(bytes).map_err(|e| EngineError::Other(format!("We can't open '{name}': {e}")))?;
+    let sniffed = malu123_xlsx::sniff(bytes);
+    if sniffed == malu123_xlsx::Format::Xls {
+        let (wb, report) = malu123_xlsx::read_xls(bytes).map_err(|e| EngineError::Other(format!("We can't open '{name}': {e}")))?;
         return Ok((wb, report.warnings));
     }
-    if sniffed == gridcraft_xlsx::Format::LegacyBinary {
+    if sniffed == malu123_xlsx::Format::LegacyBinary {
         return Err(EngineError::Other(format!(
-            "'{name}' is a legacy binary file but not an Excel workbook (no workbook stream). GridCraft can't open it."
+            "'{name}' is a legacy binary file but not an Excel workbook (no workbook stream). Malu123 can't open it."
         )));
     }
     // Content wins over the extension: an ODS or XLSB package is imported as what it is,
     // whatever it is called; the extension only decides when the bytes don't say.
     let import = match sniffed {
-        gridcraft_xlsx::Format::Ods => Some(FileKind::Ods),
-        gridcraft_xlsx::Format::Xlsb => Some(FileKind::Xlsb),
+        malu123_xlsx::Format::Ods => Some(FileKind::Ods),
+        malu123_xlsx::Format::Xlsb => Some(FileKind::Xlsb),
         // An XLSX package is never read as ODS/XLSB just because of its name.
-        gridcraft_xlsx::Format::Xlsx => None,
+        malu123_xlsx::Format::Xlsx => None,
         _ => kind.filter(|k| matches!(k, FileKind::Ods | FileKind::Xlsb)),
     };
     if let Some(import) = import {
-        let read = if import == FileKind::Ods { gridcraft_xlsx::read_ods } else { gridcraft_xlsx::read_xlsb };
+        let read = if import == FileKind::Ods { malu123_xlsx::read_ods } else { malu123_xlsx::read_xlsb };
         let (wb, report) = read(bytes).map_err(|e| EngineError::Other(format!("We can't import '{name}': {e}")))?;
         return Ok((wb, report.warnings));
     }
     // Text named `.xlsx` is read as text.
-    if sniffed == gridcraft_xlsx::Format::Xlsx || (kind == Some(FileKind::Xlsx) && sniffed != gridcraft_xlsx::Format::Csv) {
-        let (wb, report) = gridcraft_xlsx::read_xlsx(bytes).map_err(|e| {
-            EngineError::Other(match (&e, gridcraft_xlsx::oversized_part(bytes)) {
-                (gridcraft_xlsx::IoError::TooLarge(_), Some((part, size))) => part_too_large_message(name, &part, size),
+    if sniffed == malu123_xlsx::Format::Xlsx || (kind == Some(FileKind::Xlsx) && sniffed != malu123_xlsx::Format::Csv) {
+        let (wb, report) = malu123_xlsx::read_xlsx(bytes).map_err(|e| {
+            EngineError::Other(match (&e, malu123_xlsx::oversized_part(bytes)) {
+                (malu123_xlsx::IoError::TooLarge(_), Some((part, size))) => part_too_large_message(name, &part, size),
                 _ => format!("We can't open '{name}': {e}"),
             })
         })?;
@@ -157,7 +157,7 @@ fn open_plain(name: &str, bytes: &[u8], csv_as_text: bool) -> Result<(Workbook, 
     }
     match kind {
         Some(FileKind::Json) => {
-            let mut wb: Workbook = serde_json::from_slice(bytes).map_err(|e| EngineError::Other(format!("not a GridCraft JSON workbook: {e}")))?;
+            let mut wb: Workbook = serde_json::from_slice(bytes).map_err(|e| EngineError::Other(format!("not a Malu123 JSON workbook: {e}")))?;
             wb.styles.rebuild_index();
             if wb.sheets.is_empty() {
                 wb = Workbook::new();
@@ -172,16 +172,16 @@ fn open_plain(name: &str, bytes: &[u8], csv_as_text: bool) -> Result<(Workbook, 
             Ok((wb, warnings))
         }
         Some(FileKind::Tsv) => {
-            let opts = gridcraft_xlsx::CsvOptions { delimiter: b'\t', parse_values: !csv_as_text, ..Default::default() };
-            let mut wb = gridcraft_xlsx::read_csv(bytes, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
+            let opts = malu123_xlsx::CsvOptions { delimiter: b'\t', parse_values: !csv_as_text, ..Default::default() };
+            let mut wb = malu123_xlsx::read_csv(bytes, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
             // Tab is what makes it a .tsv/.txt; saved as .csv it gets the CSV default.
             wb.csv_delimiter = None;
             rename_first_sheet(&mut wb, name);
             Ok((wb, vec![]))
         }
         _ => {
-            let opts = gridcraft_xlsx::CsvOptions { delimiter: 0, parse_values: !csv_as_text, ..Default::default() };
-            let mut wb = gridcraft_xlsx::read_csv(bytes, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
+            let opts = malu123_xlsx::CsvOptions { delimiter: 0, parse_values: !csv_as_text, ..Default::default() };
+            let mut wb = malu123_xlsx::read_csv(bytes, &opts).map_err(|e| EngineError::Other(e.to_string()))?;
             rename_first_sheet(&mut wb, name);
             Ok((wb, vec![]))
         }
@@ -193,7 +193,7 @@ fn open_plain(name: &str, bytes: &[u8], csv_as_text: bool) -> Result<(Workbook, 
 /// per part, so smaller sheets fit; the shared strings are one part for every sheet, so only a
 /// CSV, which has no parts, helps there.
 fn part_too_large_message(name: &str, part: &str, size: u64) -> String {
-    let limit = gridcraft_xlsx::MAX_PART >> 20;
+    let limit = malu123_xlsx::MAX_PART >> 20;
     let mb = size >> 20;
     let size = if mb > limit { format!("{mb} MB") } else { format!("more than {limit} MB") };
     let remedy = if part.contains("worksheets/") {
@@ -202,7 +202,7 @@ fn part_too_large_message(name: &str, part: &str, size: u64) -> String {
         "To open it, save the data as CSV, which keeps only its values."
     };
     format!(
-        "We can't open '{name}': its part {part} unpacks to {size}, over GridCraft's limit of {limit} MB for one part \
+        "We can't open '{name}': its part {part} unpacks to {size}, over Malu123's limit of {limit} MB for one part \
          (a guard against damaged or malicious files). {remedy}"
     )
 }
@@ -240,7 +240,7 @@ pub fn save_bytes_as(wb: &Workbook, path: &str, kind: FileKind) -> Result<Vec<u8
         // the VBA project, so any other name saves without it, as Excel does.
         FileKind::Xlsx => {
             let book = std::path::Path::new(path).file_name().and_then(|n| n.to_str()).unwrap_or_default();
-            gridcraft_xlsx::write_xlsx_named(wb, gridcraft_xlsx::XlsxKind::from_path(path), book).map_err(|e| EngineError::Other(e.to_string()))
+            malu123_xlsx::write_xlsx_named(wb, malu123_xlsx::XlsxKind::from_path(path), book).map_err(|e| EngineError::Other(e.to_string()))
         }
         FileKind::Xls => {
             Err(EngineError::Other("Excel 97-2003 (.xls) is supported for import only. Save as .xlsx or another supported export format.".into()))
@@ -258,7 +258,7 @@ pub fn save_bytes_as(wb: &Workbook, path: &str, kind: FileKind) -> Result<Vec<u8
 /// [`save_bytes`] for the file at `path`: relative paths to linked workbooks are rewritten for
 /// its folder, so they still name the same files.
 pub fn save_file_bytes(wb: &Workbook, path: &str) -> Result<Vec<u8>> {
-    match source_dir(path).and_then(|f| gridcraft_xlsx::rebase_links(wb, &f)) {
+    match source_dir(path).and_then(|f| malu123_xlsx::rebase_links(wb, &f)) {
         Some(rebased) => save_bytes(&rebased, path),
         None => save_bytes(wb, path),
     }
@@ -279,11 +279,11 @@ pub fn source_path(path: &str) -> Option<std::path::PathBuf> {
 /// characters in each cell" (Microsoft Support, *Excel formatting and features that are not
 /// transferred to other file formats*): number formats applied, never column-width `#####`.
 fn csv(wb: &Workbook, sh: &Sheet, delimiter: u8) -> Result<Vec<u8>> {
-    gridcraft_xlsx::write_csv(sh, delimiter, |c| {
+    malu123_xlsx::write_csv(sh, delimiter, |c| {
         // General's grid-width formatting rounds large identifiers to scientific notation.
         // Delimited files have no column width, so preserve the whole numeric value instead.
         if wb.styles.get(sh.style_id(c)).num_fmt.as_str().eq_ignore_ascii_case("General")
-            && let gridcraft_core::Value::Number(number) = sh.value(c)
+            && let malu123_core::Value::Number(number) = sh.value(c)
             && number.is_finite()
         {
             number.to_string()
@@ -310,16 +310,16 @@ fn html_cell_css(wb: &Workbook, sh: &Sheet, c: CellRef, dir: CellDir) -> String 
     if let Some(h) = st.font.color.hex(&wb.theme) {
         let _ = write!(css, "color:{h};");
     }
-    if st.fill.pattern != gridcraft_model::PatternType::None
+    if st.fill.pattern != malu123_model::PatternType::None
         && let Some(h) = st.fill.fg.hex(&wb.theme)
     {
         let _ = write!(css, "background:{h};");
     }
     let v = sh.value(c);
     let align = match st.align.h {
-        gridcraft_model::HAlign::Center => Some("center"),
-        gridcraft_model::HAlign::Right => Some("right"),
-        gridcraft_model::HAlign::Left => Some("left"),
+        malu123_model::HAlign::Center => Some("center"),
+        malu123_model::HAlign::Right => Some("right"),
+        malu123_model::HAlign::Left => Some("left"),
         _ if v.is_number() => Some(if sh.right_to_left { "left" } else { "right" }),
         _ if dir == CellDir::Auto => None,
         _ => Some("left"),
@@ -526,7 +526,7 @@ pub fn to_html(wb: &Workbook, sheet: usize) -> Result<String> {
     if fixed {
         // Sheet units are CSS pixels; the table starts at the used range, not at A1.
         let (left, top) = used.map_or((0.0, 0.0), |r| (sh.col_left(r.start.col), sh.row_top(r.start.row)));
-        let place = |a: &gridcraft_model::Anchor| {
+        let place = |a: &malu123_model::Anchor| {
             format!(
                 "position:absolute;left:{}px;top:{}px;width:{}px;height:{}px",
                 sh.col_left(a.cell.col) - left + f64::from(a.dx),
@@ -693,9 +693,9 @@ pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
 mod tests {
     use super::*;
 
-    fn book(rtl: bool, cells: &[(&str, gridcraft_core::Value, gridcraft_model::HAlign)]) -> Workbook {
+    fn book(rtl: bool, cells: &[(&str, malu123_core::Value, malu123_model::HAlign)]) -> Workbook {
         let mut wb = Workbook::new();
-        let ids: Vec<_> = cells.iter().map(|(_, _, h)| wb.styles.derive(gridcraft_model::StyleId::DEFAULT, |st| st.align.h = *h)).collect();
+        let ids: Vec<_> = cells.iter().map(|(_, _, h)| wb.styles.derive(malu123_model::StyleId::DEFAULT, |st| st.align.h = *h)).collect();
         let sh = wb.sheet_mut(0).unwrap();
         sh.right_to_left = rtl;
         for ((at, value, _), id) in cells.iter().zip(ids) {
@@ -714,9 +714,9 @@ mod tests {
     #[test]
     fn html_export_embeds_images_as_data_uris() {
         let mut wb = Workbook::new();
-        wb.sheet_mut(0).unwrap().images.push(gridcraft_model::Image {
+        wb.sheet_mut(0).unwrap().images.push(malu123_model::Image {
             id: 1,
-            anchor: gridcraft_model::Anchor { cell: CellRef::new(0, 0), dx: 0.0, dy: 0.0, width: 72.0, height: 36.0, mode: Default::default() },
+            anchor: malu123_model::Anchor { cell: CellRef::new(0, 0), dx: 0.0, dy: 0.0, width: 72.0, height: 36.0, mode: Default::default() },
             data: vec![1, 2, 3].into(),
             mime: "image/png".into(),
             alt: "a \"logo\"".into(),
@@ -734,16 +734,16 @@ mod tests {
     fn html_export_places_images_at_their_anchor_using_sheet_geometry() {
         let mut wb = Workbook::new();
         let sh = wb.sheet_mut(0).unwrap();
-        sh.cols.insert(1, gridcraft_model::LineInfo { size: Some(100.0), ..Default::default() });
-        sh.rows.insert(1, gridcraft_model::LineInfo { size: Some(30.0), ..Default::default() });
-        sh.images.push(gridcraft_model::Image {
+        sh.cols.insert(1, malu123_model::LineInfo { size: Some(100.0), ..Default::default() });
+        sh.rows.insert(1, malu123_model::LineInfo { size: Some(30.0), ..Default::default() });
+        sh.images.push(malu123_model::Image {
             id: 1,
-            anchor: gridcraft_model::Anchor { cell: CellRef::new(3, 2), dx: 5.0, dy: 7.0, width: 10.0, height: 20.0, mode: Default::default() },
+            anchor: malu123_model::Anchor { cell: CellRef::new(3, 2), dx: 5.0, dy: 7.0, width: 10.0, height: 20.0, mode: Default::default() },
             data: vec![1].into(),
             mime: "image/png".into(),
             alt: String::new(),
         });
-        sh.set_value(CellRef::new(1, 1), gridcraft_core::Value::Number(1.0));
+        sh.set_value(CellRef::new(1, 1), malu123_core::Value::Number(1.0));
         let html = to_html(&wb, 0).unwrap();
         // The table starts at B2; the picture is at C4: one 100 px column and two rows (30 + 20) further on.
         assert!(html.contains("<col style=\"width:100px\">"), "{html}");
@@ -754,10 +754,10 @@ mod tests {
     fn book_with_picture(anchor: &str, cell_at: (u32, u32)) -> Workbook {
         let mut wb = Workbook::new();
         let sh = wb.sheet_mut(0).unwrap();
-        sh.set_value(CellRef::new(cell_at.0, cell_at.1), gridcraft_core::Value::Number(1.0));
-        sh.images.push(gridcraft_model::Image {
+        sh.set_value(CellRef::new(cell_at.0, cell_at.1), malu123_core::Value::Number(1.0));
+        sh.images.push(malu123_model::Image {
             id: 1,
-            anchor: gridcraft_model::Anchor {
+            anchor: malu123_model::Anchor {
                 cell: CellRef::parse(anchor).unwrap(),
                 dx: 0.0,
                 dy: 0.0,
@@ -776,9 +776,9 @@ mod tests {
     fn html_export_places_images_past_hidden_columns_and_rows() {
         let mut wb = book_with_picture("C3", (0, 0));
         let sh = wb.sheet_mut(0).unwrap();
-        sh.set_value(CellRef::new(2, 2), gridcraft_core::Value::Number(2.0));
-        sh.cols.insert(1, gridcraft_model::LineInfo { hidden: true, ..Default::default() });
-        sh.rows.insert(1, gridcraft_model::LineInfo { hidden: true, ..Default::default() });
+        sh.set_value(CellRef::new(2, 2), malu123_core::Value::Number(2.0));
+        sh.cols.insert(1, malu123_model::LineInfo { hidden: true, ..Default::default() });
+        sh.rows.insert(1, malu123_model::LineInfo { hidden: true, ..Default::default() });
         let html = to_html(&wb, 0).unwrap();
         // Column B and row 2 take no room: C3 is one default column and row from A1.
         assert_eq!(html.matches("<col ").count(), 2, "{html}");
@@ -795,8 +795,8 @@ mod tests {
 
     #[test]
     fn html_export_marks_right_to_left_sheets() {
-        use gridcraft_core::Value;
-        use gridcraft_model::HAlign;
+        use malu123_core::Value;
+        use malu123_model::HAlign;
         let wb = book(true, &[("A1", Value::text("Hello!"), HAlign::General), ("B1", Value::Number(-5.0), HAlign::General)]);
         let html = to_html(&wb, 0).unwrap();
         assert!(html.contains("<body><table dir=\"rtl\">"), "{html}");
@@ -817,8 +817,8 @@ mod tests {
 
     #[test]
     fn html_export_lets_arabic_general_text_align_by_direction() {
-        use gridcraft_core::Value;
-        use gridcraft_model::HAlign;
+        use malu123_core::Value;
+        use malu123_model::HAlign;
         let wb = book(
             false,
             &[
@@ -845,8 +845,8 @@ mod tests {
 
     #[test]
     fn html_export_of_latin_ltr_sheet_is_unchanged() {
-        use gridcraft_core::Value;
-        use gridcraft_model::HAlign;
+        use malu123_core::Value;
+        use malu123_model::HAlign;
         let mut wb = book(
             false,
             &[
@@ -881,12 +881,12 @@ mod tests {
     fn html_export_fails_instead_of_dropping_cells_past_the_row_limit() {
         let mut wb = Workbook::new();
         let sh = wb.sheet_mut(0).unwrap();
-        sh.set_value(CellRef::new(0, 0), gridcraft_core::Value::text("near"));
-        sh.set_value(CellRef::new(149_999, 0), gridcraft_core::Value::text("far"));
+        sh.set_value(CellRef::new(0, 0), malu123_core::Value::text("near"));
+        sh.set_value(CellRef::new(149_999, 0), malu123_core::Value::text("far"));
         assert!(save_bytes(&wb, "book.html").is_err());
         let sh = wb.sheet_mut(0).unwrap();
         sh.remove_cell(CellRef::new(149_999, 0));
-        sh.set_value(CellRef::new(100_000, 0), gridcraft_core::Value::text("far"));
+        sh.set_value(CellRef::new(100_000, 0), malu123_core::Value::text("far"));
         let html = String::from_utf8(save_bytes(&wb, "book.html").unwrap()).unwrap();
         assert!(html.contains(">near</td>") && html.contains(">far</td>"));
     }
@@ -897,7 +897,7 @@ mod tests {
         wb.vba_project = Some(b"vba".to_vec().into());
         let has_macros = |path: &str| {
             let bytes = save_bytes(&wb, path).unwrap();
-            gridcraft_xlsx::read_xlsx(&bytes).unwrap().0.vba_project.is_some()
+            malu123_xlsx::read_xlsx(&bytes).unwrap().0.vba_project.is_some()
         };
         assert!(has_macros("book.xlsm"));
         assert!(has_macros("BOOK.XLSM"));
@@ -923,7 +923,7 @@ mod tests {
     #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn failed_save_leaves_no_temporary_file() {
-        let dir = std::env::temp_dir().join(format!("gridcraft-write-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("malu123-write-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let blocked = dir.join("Book1.xlsx");
@@ -943,7 +943,7 @@ mod tests {
     #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn script_sandbox_refuses_file_access_until_dropped() {
-        let dir = std::env::temp_dir().join(format!("gridcraft-sandbox-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("malu123-sandbox-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let existing = dir.join("in.csv");
@@ -1013,8 +1013,8 @@ mod tests {
     fn csv_save_of_a_workbook_not_read_from_csv_uses_commas() {
         let mut wb = Workbook::new();
         if let Some(sh) = wb.sheet_mut(0) {
-            sh.set_value(CellRef::new(0, 0), gridcraft_core::Value::text("a"));
-            sh.set_value(CellRef::new(0, 1), gridcraft_core::Value::Number(1.0));
+            sh.set_value(CellRef::new(0, 0), malu123_core::Value::text("a"));
+            sh.set_value(CellRef::new(0, 1), malu123_core::Value::Number(1.0));
         }
         assert_eq!(save_bytes(&wb, "new.csv").unwrap(), b"a,1\r\n");
         // Through .xlsx the CSV origin is gone, as in Excel.
@@ -1030,7 +1030,7 @@ mod tests {
 
     #[test]
     fn encrypted_workbook_is_reported_not_misread() {
-        let file = gridcraft_xlsx::testing::encrypt_workbook(b"package", "pw");
+        let file = malu123_xlsx::testing::encrypt_workbook(b"package", "pw");
         let msg = open_bytes("secret.xlsx", &file).unwrap_err().to_string();
         assert!(msg.contains(PASSWORD_REQUIRED), "got: {msg}");
         assert!(!msg.contains("zip"), "must not surface the zip error: {msg}");
@@ -1046,10 +1046,10 @@ mod tests {
     #[test]
     fn encryption_no_password_opens_is_reported_without_asking_for_one() {
         let info: &[u8] = &[3, 0, 2, 0, 4, 0, 0, 0]; // Standard header flags: RC4, not AES
-        let file = gridcraft_xlsx::testing::compound_file(&[("EncryptionInfo", info), ("EncryptedPackage", &[0; 8])]);
+        let file = malu123_xlsx::testing::compound_file(&[("EncryptionInfo", info), ("EncryptedPackage", &[0; 8])]);
         let msg = open_bytes("rc4.xlsx", &file).unwrap_err().to_string();
         assert!(msg.contains("RC4") && !msg.contains(PASSWORD_REQUIRED), "got: {msg}");
-        let irm = gridcraft_xlsx::testing::compound_file(&[("EncryptedPackage", &[0; 8])]);
+        let irm = malu123_xlsx::testing::compound_file(&[("EncryptedPackage", &[0; 8])]);
         let msg = open_bytes("irm.xlsx", &irm).unwrap_err().to_string();
         assert!(msg.contains("rights-management") && !msg.contains("damaged"), "got: {msg}");
     }
@@ -1066,8 +1066,8 @@ mod tests {
     /// whole values in narrow columns (never `#####`), quoting unchanged.
     #[test]
     fn csv_writes_displayed_text() {
-        use gridcraft_core::{CellError, Value};
-        use gridcraft_model::{Cell, Formula, LineInfo, NumFmt, StyleId};
+        use malu123_core::{CellError, Value};
+        use malu123_model::{Cell, Formula, LineInfo, NumFmt, StyleId};
         let mut wb = Workbook::new();
         let mut styled = |code: &str| wb.styles.derive(StyleId::DEFAULT, |s| s.num_fmt = NumFmt::new(code));
         let (date, money, pct, frac, text, fixed, thousands) =
@@ -1100,8 +1100,8 @@ mod tests {
 
     #[test]
     fn delimited_exports_preserve_general_precision_and_explicit_number_formats() {
-        use gridcraft_core::Value;
-        use gridcraft_model::{Cell, NumFmt, StyleId};
+        use malu123_core::Value;
+        use malu123_model::{Cell, NumFmt, StyleId};
         let mut workbook = Workbook::new();
         let scientific = workbook.styles.derive(StyleId::DEFAULT, |style| style.num_fmt = NumFmt::new("0.00E+00"));
         let sheet = workbook.sheet_mut(0).unwrap();
@@ -1153,7 +1153,7 @@ mod tests {
     #[test]
     fn a_part_over_the_size_limit_says_how_to_get_the_data_in() {
         let mut wb = Workbook::new();
-        wb.sheet_mut(0).unwrap().set_value(CellRef::new(0, 0), gridcraft_core::Value::text("big"));
+        wb.sheet_mut(0).unwrap().set_value(CellRef::new(0, 0), malu123_core::Value::text("big"));
         let package = save_bytes(&wb, "big.xlsx").unwrap();
         // The size reported in storytold/gridcraft#1242.
         let msg = open_bytes("big.xlsx", &declaring(package.clone(), "xl/worksheets/sheet1.xml", 540_278_731)).unwrap_err().to_string();
@@ -1179,15 +1179,15 @@ mod tests {
     #[test]
     fn content_wins_over_a_mismatched_extension() {
         let mut wb = Workbook::new();
-        wb.sheet_mut(0).unwrap().set_value(CellRef::new(0, 0), gridcraft_core::Value::Number(7.0));
+        wb.sheet_mut(0).unwrap().set_value(CellRef::new(0, 0), malu123_core::Value::Number(7.0));
         let package = save_bytes(&wb, "book.xlsx").unwrap();
         for name in ["book.xlsx", "book.ods", "book.xlsb", "book.csv"] {
             let (opened, _) = open_bytes(name, &package).unwrap_or_else(|e| panic!("{name}: {e}"));
-            assert_eq!(opened.sheet(0).unwrap().value(CellRef::new(0, 0)), gridcraft_core::Value::Number(7.0), "{name}");
+            assert_eq!(opened.sheet(0).unwrap().value(CellRef::new(0, 0)), malu123_core::Value::Number(7.0), "{name}");
         }
         for name in ["data.xlsx", "data.csv"] {
             let (opened, _) = open_bytes(name, b"a,b\n1,2\n").unwrap_or_else(|e| panic!("{name}: {e}"));
-            assert_eq!(opened.sheet(0).unwrap().value(CellRef::new(0, 1)), gridcraft_core::Value::text("b"), "{name}");
+            assert_eq!(opened.sheet(0).unwrap().value(CellRef::new(0, 1)), malu123_core::Value::text("b"), "{name}");
         }
     }
 }

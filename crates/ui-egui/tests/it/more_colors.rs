@@ -2,8 +2,8 @@
 
 use egui::{Event, Key, Modifiers, os::OperatingSystem};
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_ui_egui::SheetApp;
+use malu123_engine::Session;
+use malu123_ui_egui::SheetApp;
 
 type Harness = egui_kittest::Harness<'static, SheetApp>;
 
