@@ -1504,199 +1504,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "malu123"
-version = "0.11.1"
-dependencies = [
- "arboard",
- "chrono",
- "craft-print",
- "eframe",
- "egui",
- "fmv-macos-events",
- "malu123-engine",
- "malu123-ui-egui",
- "image",
- "log",
- "muda",
- "objc2 0.6.5",
- "objc2-app-kit 0.3.2",
- "pollster 1.0.1",
- "rfd",
- "serde_json",
- "winresource",
-]
-
-[[package]]
-name = "malu123-calc"
-version = "0.11.1"
-dependencies = [
- "malu123-core",
- "malu123-formula",
- "malu123-functions",
- "malu123-model",
- "malu123-numfmt",
- "log",
-]
-
-[[package]]
-name = "malu123-chart"
-version = "0.11.1"
-dependencies = [
- "malu123-calc",
- "malu123-core",
- "malu123-model",
- "malu123-numfmt",
- "serde",
-]
-
-[[package]]
-name = "malu123-cli"
-version = "0.11.1"
-dependencies = [
- "malu123-engine",
- "malu123-mcp",
- "log",
- "quick-xml",
- "serde_json",
- "zip",
-]
-
-[[package]]
-name = "malu123-core"
-version = "0.11.1"
-dependencies = [
- "chrono",
- "js-sys",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "malu123-engine"
-version = "0.11.1"
-dependencies = [
- "malu123-calc",
- "malu123-chart",
- "malu123-core",
- "malu123-formula",
- "malu123-functions",
- "malu123-model",
- "malu123-numfmt",
- "malu123-pdf",
- "malu123-xlsx",
- "image",
- "log",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "zip",
-]
-
-[[package]]
-name = "malu123-formula"
-version = "0.11.1"
-dependencies = [
- "malu123-core",
- "serde",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "malu123-functions"
-version = "0.11.1"
-dependencies = [
- "malu123-core",
- "regex",
-]
-
-[[package]]
-name = "malu123-mcp"
-version = "0.11.1"
-dependencies = [
- "malu123-engine",
- "log",
- "serde_json",
-]
-
-[[package]]
-name = "malu123-model"
-version = "0.11.1"
-dependencies = [
- "malu123-core",
- "malu123-formula",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "malu123-numfmt"
-version = "0.11.1"
-dependencies = [
- "malu123-core",
-]
-
-[[package]]
-name = "malu123-pdf"
-version = "0.11.1"
-
-[[package]]
-name = "malu123-ui-egui"
-version = "0.11.1"
-dependencies = [
- "craft-ui",
- "egui",
- "egui_kittest",
- "epaint_default_fonts",
- "malu123-chart",
- "malu123-engine",
- "malu123-xlsx",
- "image",
- "log",
- "serde",
- "serde_json",
- "skrifa",
- "sys-locale",
- "toml",
- "web-sys",
- "zbus",
-]
-
-[[package]]
-name = "malu123-web"
-version = "0.11.1"
-dependencies = [
- "eframe",
- "egui",
- "malu123-engine",
- "malu123-ui-egui",
- "js-sys",
- "log",
- "rfd",
- "serde_json",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "malu123-xlsx"
-version = "0.11.1"
-dependencies = [
- "aes",
- "malu123-core",
- "malu123-formula",
- "malu123-model",
- "quick-xml",
- "sha1",
- "sha2",
- "thiserror 2.0.21",
- "zip",
-]
-
-[[package]]
 name = "guillotiere"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2054,6 +1861,199 @@ name = "log"
 version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
+
+[[package]]
+name = "malu123"
+version = "0.11.1"
+dependencies = [
+ "arboard",
+ "chrono",
+ "craft-print",
+ "eframe",
+ "egui",
+ "fmv-macos-events",
+ "image",
+ "log",
+ "malu123-engine",
+ "malu123-ui-egui",
+ "muda",
+ "objc2 0.6.5",
+ "objc2-app-kit 0.3.2",
+ "pollster 1.0.1",
+ "rfd",
+ "serde_json",
+ "winresource",
+]
+
+[[package]]
+name = "malu123-calc"
+version = "0.11.1"
+dependencies = [
+ "log",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-functions",
+ "malu123-model",
+ "malu123-numfmt",
+]
+
+[[package]]
+name = "malu123-chart"
+version = "0.11.1"
+dependencies = [
+ "malu123-calc",
+ "malu123-core",
+ "malu123-model",
+ "malu123-numfmt",
+ "serde",
+]
+
+[[package]]
+name = "malu123-cli"
+version = "0.11.1"
+dependencies = [
+ "log",
+ "malu123-engine",
+ "malu123-mcp",
+ "quick-xml",
+ "serde_json",
+ "zip",
+]
+
+[[package]]
+name = "malu123-core"
+version = "0.11.1"
+dependencies = [
+ "chrono",
+ "js-sys",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "malu123-engine"
+version = "0.11.1"
+dependencies = [
+ "image",
+ "log",
+ "malu123-calc",
+ "malu123-chart",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-functions",
+ "malu123-model",
+ "malu123-numfmt",
+ "malu123-pdf",
+ "malu123-xlsx",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "zip",
+]
+
+[[package]]
+name = "malu123-formula"
+version = "0.11.1"
+dependencies = [
+ "malu123-core",
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "malu123-functions"
+version = "0.11.1"
+dependencies = [
+ "malu123-core",
+ "regex",
+]
+
+[[package]]
+name = "malu123-mcp"
+version = "0.11.1"
+dependencies = [
+ "log",
+ "malu123-engine",
+ "serde_json",
+]
+
+[[package]]
+name = "malu123-model"
+version = "0.11.1"
+dependencies = [
+ "malu123-core",
+ "malu123-formula",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "malu123-numfmt"
+version = "0.11.1"
+dependencies = [
+ "malu123-core",
+]
+
+[[package]]
+name = "malu123-pdf"
+version = "0.11.1"
+
+[[package]]
+name = "malu123-ui-egui"
+version = "0.11.1"
+dependencies = [
+ "craft-ui",
+ "egui",
+ "egui_kittest",
+ "epaint_default_fonts",
+ "image",
+ "log",
+ "malu123-chart",
+ "malu123-engine",
+ "malu123-xlsx",
+ "serde",
+ "serde_json",
+ "skrifa",
+ "sys-locale",
+ "toml",
+ "web-sys",
+ "zbus",
+]
+
+[[package]]
+name = "malu123-web"
+version = "0.11.1"
+dependencies = [
+ "eframe",
+ "egui",
+ "js-sys",
+ "log",
+ "malu123-engine",
+ "malu123-ui-egui",
+ "rfd",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "malu123-xlsx"
+version = "0.11.1"
+dependencies = [
+ "aes",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-model",
+ "quick-xml",
+ "sha1",
+ "sha2",
+ "thiserror 2.0.21",
+ "zip",
+]
 
 [[package]]
 name = "memchr"
