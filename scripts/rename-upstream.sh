@@ -15,8 +15,11 @@ cd "$(git rev-parse --show-toplevel)"
 # Files this script never rewrites: they describe the fork itself.
 SKIP='^(README\.md|NOTICE|LICENSE-MIT|LICENSE-APACHE|docs/malu123/.*|scripts/rename-upstream\..*)$'
 
-# 1. brand files
+# 1. brand files, and the three places that call them "the one exception"
 if [ -d docs/brand ]; then git rm -rq docs/brand; fi
+sed -i '/^| `docs\/brand\//d' ATTRIBUTION.md
+sed -i 's| The one exception is the ArtCraft brand files in `docs/brand/`: ArtCraft trademarks, not open source, used under `docs/brand/LICENSE-brand.txt`.| The ArtCraft brand files that upstream GridCraft carries in `docs/brand/` are removed in Malu123, as their licence requires of forks.|' ATTRIBUTION.md
+sed -i 's|^- The ArtCraft brand files in `docs/brand/` are ArtCraft trademarks under `docs/brand/LICENSE-brand.txt`, the one exception.|- Upstream GridCraft'"'"'s ArtCraft brand files (`docs/brand/`) are trademarks and are removed from this fork, as their licence requires.|' AGENTS.md CLAUDE.md
 
 # 2. paths
 { git ls-files | grep -i gridcraft || true; } | sort -r | while read -r old; do

@@ -15,6 +15,7 @@ PROTECT = [
     "GridCraft contributors",
     "GridCraft authors",
     "upstream GridCraft",
+    "Upstream GridCraft",
     "fork of GridCraft",
     "forked from GridCraft",
     "credit the upstream",
