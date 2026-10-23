@@ -1,3 +1,25 @@
+# Malu123 — instructions for agents (read first)
+
+Malu123 is the MaluOS spreadsheet, a fork of GridCraft (`upstream` remote). Everything below the
+rule is GridCraft's own guidance and still applies. Malu123-specific rules:
+
+- **The plan is `docs/malu123/plan.md`; progress is `docs/malu123/status.md`.** Start there, not
+  in `plan/` (upstream's local-only folder, which this fork does not have).
+- **Keep upstream mergeable.** Do not edit `crates/{core,numfmt,formula,functions,model,calc,xlsx,chart,pdf,engine,mcp}`
+  except for bug fixes you would send upstream. Malu123 code goes in new crates
+  (`crates/malu123-llm`, `crates/malu123-assist`) and fenced hooks in `crates/ui-egui` and `apps/`.
+  Crate names stay `gridcraft-*`; only the L7 apps and packaging are renamed (plan step 0.4).
+- **The assistant acts only through engine commands** (`Session::execute`), one undoable history
+  group per turn. It never touches the model directly.
+- **Keys live in the MaluOS vault** (`/run/maluos/vault.sock`) or an env var; never in settings
+  files, workbooks or the repo.
+- **Commit ids** are plan steps: `M1.3: deb packaging`. Run `cargo xtask ci` before pushing.
+- **This host** is the MaluOS dev VM: it is killed by the hypervisor on page-cache pressure. Run
+  cargo under `systemd-run --user --scope -p MemoryHigh=4500M -p MemoryMax=6G` and `-j 6`.
+- `mv`/`cp` are not aliased here; the macOS notes below do not apply.
+
+---
+
 # GridCraft — instructions for agents
 
 GridCraft is a clean-room, open-source, Rust-native spreadsheet targeting Microsoft Excel parity — and superiority (speed, openness, agent control). It runs natively on macOS, Windows, Linux and BSD, and on the web via WASM. Siblings with the same conventions: `../designcraft` (InDesign-class, the closest reference), `../photocraft` (Photoshop), `../vectorcraft` (Illustrator), `../pdfcraft` (Acrobat), `../filmcraft` (Premiere), `../lightcraft` (Lightroom), `../effectcraft` (After Effects).
@@ -17,7 +39,7 @@ Standards and learnings shared across the crafting apps live in `../../craftrule
 - Prefer art generated in code: the UI icon set (`crates/ui-egui/src/icons.rs`), table and cell style palettes, themes and sample workbooks are drawn/defined in code and original.
 - Never copy Office's icons, ribbon artwork, theme XML, table-style definitions, templates, clip art or wording beyond feature names. Excel feature *names* (menu labels, function names) are fine.
 - Screenshots of Microsoft software are never committed (they live only in `plan/excel/screenshots/`).
-- The ArtCraft brand files in `docs/brand/` are ArtCraft trademarks under `docs/brand/LICENSE-brand.txt`, the one exception.
+- Upstream GridCraft's ArtCraft brand files (`docs/brand/`) are trademarks and are removed from this fork, as their licence requires.
 
 ## Never crash
 People trust GridCraft with their numbers; a crash loses their work. **This outranks feature work.** Standard: [`craftrules/standards/never-crash.md`](https://github.com/storytold/craftrules/blob/main/standards/never-crash.md).
