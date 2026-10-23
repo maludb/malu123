@@ -3,9 +3,9 @@
 
 use egui::{Event, Modifiers, PointerButton, Pos2, Shape, accesskit::Role};
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_engine::core::CellRef;
-use gridcraft_ui_egui::{SheetApp, grid};
+use malu123_engine::Session;
+use malu123_engine::core::CellRef;
+use malu123_ui_egui::{SheetApp, grid};
 
 type Harness = egui_kittest::Harness<'static, SheetApp>;
 

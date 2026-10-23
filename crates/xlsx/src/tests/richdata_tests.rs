@@ -2,8 +2,8 @@
 
 use std::sync::Arc;
 
-use gridcraft_core::{CellError, CellRef, RangeRef, Value};
-use gridcraft_model::{Cell, CellPicture, Formula, Sheet, Workbook};
+use malu123_core::{CellError, CellRef, RangeRef, Value};
+use malu123_model::{Cell, CellPicture, Formula, Sheet, Workbook};
 
 use super::make_zip;
 use crate::package::Package;

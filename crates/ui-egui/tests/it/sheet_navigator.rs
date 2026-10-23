@@ -2,8 +2,8 @@
 
 use egui::{Event, Key, Modifiers};
 use egui_kittest::kittest::Queryable;
-use gridcraft_engine::Session;
-use gridcraft_ui_egui::SheetApp;
+use malu123_engine::Session;
+use malu123_ui_egui::SheetApp;
 use serde_json::json;
 
 fn harness() -> egui_kittest::Harness<'static, SheetApp> {

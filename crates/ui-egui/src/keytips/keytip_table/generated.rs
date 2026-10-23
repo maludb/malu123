@@ -9,7 +9,7 @@ pub const SEQUENCES: &[(&str, Entry)] = &[
     ("F", Entry::Tab("File")), // Excel: File tab (Backstage view); Opens the File view on Home; its letters below still run their commands.
     ("H", Entry::Tab("Home")),
     ("N", Entry::Tab("Insert")),
-    ("JI", Entry::Tab("Draw")), // Two-letter unit. Deeper Draw letters differ between Excel and GridCraft; left blank for future contributors.
+    ("JI", Entry::Tab("Draw")), // Two-letter unit. Deeper Draw letters differ between Excel and Malu123; left blank for future contributors.
     ("P", Entry::Tab("Page Layout")),
     ("M", Entry::Tab("Formulas")),
     ("A", Entry::Tab("Data")),

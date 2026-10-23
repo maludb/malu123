@@ -1,14 +1,14 @@
 [package]
-name = "gridcraft-formula"
+name = "malu123-formula"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "GridCraft formula language: lexer, parser, printer and reference adjustment"
+description = "Malu123 formula language: lexer, parser, printer and reference adjustment"
 
 [lints]
 workspace = true
 
 [dependencies]
-gridcraft-core = { workspace = true }
+malu123-core = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }

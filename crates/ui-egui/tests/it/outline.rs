@@ -1,9 +1,9 @@
 //! The outline band of grouped rows and columns: − / + and level buttons (#373).
 
 use egui::{Event, Modifiers, PointerButton, Pos2, vec2};
-use gridcraft_engine::Session;
-use gridcraft_ui_egui::SheetApp;
-use gridcraft_ui_egui::outline::{Action, layout};
+use malu123_engine::Session;
+use malu123_ui_egui::SheetApp;
+use malu123_ui_egui::outline::{Action, layout};
 use serde_json::json;
 
 type Harness = egui_kittest::Harness<'static, SheetApp>;

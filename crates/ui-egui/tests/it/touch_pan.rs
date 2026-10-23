@@ -1,9 +1,9 @@
 //! Touch input on the grid: one finger pans, a tap selects (issue #1907).
 
 use egui::{Event, Modifiers, PointerButton, TouchDeviceId, TouchId, TouchPhase};
-use gridcraft_engine::Session;
-use gridcraft_engine::core::CellRef;
-use gridcraft_ui_egui::SheetApp;
+use malu123_engine::Session;
+use malu123_engine::core::CellRef;
+use malu123_ui_egui::SheetApp;
 
 fn harness(session: Session) -> egui_kittest::Harness<'static, SheetApp> {
     let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1200.0, 800.0)).build_ui_state(

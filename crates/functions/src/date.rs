@@ -1,8 +1,8 @@
 //! Date and time functions.
 
-use gridcraft_core::date::{DateTime, datetime_from_serial, days_in_month, is_leap, serial_from_ymd, serial_in_system};
-use gridcraft_core::parse::parse_input;
-use gridcraft_core::{CellError, DateSystem, Value};
+use malu123_core::date::{DateTime, datetime_from_serial, days_in_month, is_leap, serial_from_ymd, serial_in_system};
+use malu123_core::parse::parse_input;
+use malu123_core::{CellError, DateSystem, Value};
 
 use crate::util::{R, S, arg, as_array, has, num, num_val, opt_bool, opt_num, scalar, text, to_int};
 use crate::{Arg, Ctx, FnSpec};
@@ -585,7 +585,7 @@ pub(crate) fn specs() -> Vec<FnSpec> {
 
 #[cfg(test)]
 mod tests {
-    use gridcraft_core::{CellError, Value};
+    use malu123_core::{CellError, Value};
 
     use crate::util::testutil::*;
 
@@ -819,7 +819,7 @@ mod tests {
 
     #[test]
     fn system_1904() {
-        let mut ctx = TestCtx { sys: gridcraft_core::DateSystem::D1904, ..TestCtx::default() };
+        let mut ctx = TestCtx { sys: malu123_core::DateSystem::D1904, ..TestCtx::default() };
         let spec = crate::lookup("DATE").unwrap();
         close(crate::call(spec, &[n(2000.0), n(1.0), n(1.0)], &mut ctx), 35064.0);
         let spec = crate::lookup("WEEKDAY").unwrap();
@@ -846,7 +846,7 @@ mod tests {
 
     #[test]
     fn date_text_arguments_use_the_workbook_date_system() {
-        let mut ctx = TestCtx { sys: gridcraft_core::DateSystem::D1904, ..TestCtx::default() };
+        let mut ctx = TestCtx { sys: malu123_core::DateSystem::D1904, ..TestCtx::default() };
         close(crate::call(crate::lookup("YEAR").unwrap(), &[t("1/1/2020")], &mut ctx), 2020.0);
         close(crate::call(crate::lookup("MONTH").unwrap(), &[t("2/29/1904")], &mut ctx), 2.0);
         close(crate::call(crate::lookup("DAY").unwrap(), &[t("2/29/1904")], &mut ctx), 29.0);

@@ -3,10 +3,10 @@
 
 use egui::{Event, Key, Modifiers};
 use egui_kittest::kittest::Queryable as _;
-use gridcraft_engine::Session;
-use gridcraft_engine::core::{CellRef, Value};
-use gridcraft_ui_egui::SheetApp;
-use gridcraft_ui_egui::i18n::Language;
+use malu123_engine::Session;
+use malu123_engine::core::{CellRef, Value};
+use malu123_ui_egui::SheetApp;
+use malu123_ui_egui::i18n::Language;
 use serde_json::json;
 
 type Harness = egui_kittest::Harness<'static, SheetApp>;

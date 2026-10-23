@@ -60,7 +60,7 @@ L5  malu123-assist NEW  the assistant: context builder (workbook → prompt), to
                         command catalog, plan/act loop, change log, safety rails; depends on engine + malu123-llm
 L6  ui-egui                                        (upstream + Malu123 assistant pane, settings page, branding hooks)
 L6  mcp                                            (upstream, untouched)
-L7  apps/malu123 · apps/malu123-cli · apps/gridcraft-web
+L7  apps/malu123 · apps/malu123-cli · apps/malu123-web
 ```
 
 The two new crates sit beside `engine` at L5 and `cargo xtask layers` is extended so nothing

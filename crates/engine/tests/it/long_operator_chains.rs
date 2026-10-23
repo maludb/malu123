@@ -3,8 +3,8 @@
 //! left. Entering, editing, saving and reopening such a formula must neither overflow the stack
 //! nor fall back to an error: Excel computes it.
 
-use gridcraft_core::{CellRef, Value};
-use gridcraft_engine::{DocState, Session, io};
+use malu123_core::{CellRef, Value};
+use malu123_engine::{DocState, Session, io};
 use serde_json::json;
 
 /// Excel's longest flat chain of literals: 4,096 operands, 8,192 characters with the `=`.

@@ -1504,7 +1504,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft"
+name = "malu123"
 version = "0.11.1"
 dependencies = [
  "arboard",
@@ -1513,8 +1513,8 @@ dependencies = [
  "eframe",
  "egui",
  "fmv-macos-events",
- "gridcraft-engine",
- "gridcraft-ui-egui",
+ "malu123-engine",
+ "malu123-ui-egui",
  "image",
  "log",
  "muda",
@@ -1527,34 +1527,34 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-calc"
+name = "malu123-calc"
 version = "0.11.1"
 dependencies = [
- "gridcraft-core",
- "gridcraft-formula",
- "gridcraft-functions",
- "gridcraft-model",
- "gridcraft-numfmt",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-functions",
+ "malu123-model",
+ "malu123-numfmt",
  "log",
 ]
 
 [[package]]
-name = "gridcraft-chart"
+name = "malu123-chart"
 version = "0.11.1"
 dependencies = [
- "gridcraft-calc",
- "gridcraft-core",
- "gridcraft-model",
- "gridcraft-numfmt",
+ "malu123-calc",
+ "malu123-core",
+ "malu123-model",
+ "malu123-numfmt",
  "serde",
 ]
 
 [[package]]
-name = "gridcraft-cli"
+name = "malu123-cli"
 version = "0.11.1"
 dependencies = [
- "gridcraft-engine",
- "gridcraft-mcp",
+ "malu123-engine",
+ "malu123-mcp",
  "log",
  "quick-xml",
  "serde_json",
@@ -1562,7 +1562,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-core"
+name = "malu123-core"
 version = "0.11.1"
 dependencies = [
  "chrono",
@@ -1573,18 +1573,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-engine"
+name = "malu123-engine"
 version = "0.11.1"
 dependencies = [
- "gridcraft-calc",
- "gridcraft-chart",
- "gridcraft-core",
- "gridcraft-formula",
- "gridcraft-functions",
- "gridcraft-model",
- "gridcraft-numfmt",
- "gridcraft-pdf",
- "gridcraft-xlsx",
+ "malu123-calc",
+ "malu123-chart",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-functions",
+ "malu123-model",
+ "malu123-numfmt",
+ "malu123-pdf",
+ "malu123-xlsx",
  "image",
  "log",
  "serde",
@@ -1594,37 +1594,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-formula"
+name = "malu123-formula"
 version = "0.11.1"
 dependencies = [
- "gridcraft-core",
+ "malu123-core",
  "serde",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "gridcraft-functions"
+name = "malu123-functions"
 version = "0.11.1"
 dependencies = [
- "gridcraft-core",
+ "malu123-core",
  "regex",
 ]
 
 [[package]]
-name = "gridcraft-mcp"
+name = "malu123-mcp"
 version = "0.11.1"
 dependencies = [
- "gridcraft-engine",
+ "malu123-engine",
  "log",
  "serde_json",
 ]
 
 [[package]]
-name = "gridcraft-model"
+name = "malu123-model"
 version = "0.11.1"
 dependencies = [
- "gridcraft-core",
- "gridcraft-formula",
+ "malu123-core",
+ "malu123-formula",
  "serde",
  "serde_json",
  "sha2",
@@ -1632,27 +1632,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-numfmt"
+name = "malu123-numfmt"
 version = "0.11.1"
 dependencies = [
- "gridcraft-core",
+ "malu123-core",
 ]
 
 [[package]]
-name = "gridcraft-pdf"
+name = "malu123-pdf"
 version = "0.11.1"
 
 [[package]]
-name = "gridcraft-ui-egui"
+name = "malu123-ui-egui"
 version = "0.11.1"
 dependencies = [
  "craft-ui",
  "egui",
  "egui_kittest",
  "epaint_default_fonts",
- "gridcraft-chart",
- "gridcraft-engine",
- "gridcraft-xlsx",
+ "malu123-chart",
+ "malu123-engine",
+ "malu123-xlsx",
  "image",
  "log",
  "serde",
@@ -1665,13 +1665,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-web"
+name = "malu123-web"
 version = "0.11.1"
 dependencies = [
  "eframe",
  "egui",
- "gridcraft-engine",
- "gridcraft-ui-egui",
+ "malu123-engine",
+ "malu123-ui-egui",
  "js-sys",
  "log",
  "rfd",
@@ -1682,13 +1682,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "gridcraft-xlsx"
+name = "malu123-xlsx"
 version = "0.11.1"
 dependencies = [
  "aes",
- "gridcraft-core",
- "gridcraft-formula",
- "gridcraft-model",
+ "malu123-core",
+ "malu123-formula",
+ "malu123-model",
  "quick-xml",
  "sha1",
  "sha2",
@@ -4539,7 +4539,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 name = "xtask"
 version = "0.11.1"
 dependencies = [
- "gridcraft-engine",
+ "malu123-engine",
  "serde_json",
 ]
 

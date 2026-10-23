@@ -17,14 +17,14 @@ slice ships a working app and a foundation for the next. The plan is in
 
 ## Status
 
-Phase 0 (foundation). The app is still GridCraft with the brand files removed; nothing has been
-renamed or added yet. See the plan.
+Phase 0 (foundation). The app is GridCraft renamed end to end (crates, binaries, app id,
+settings); no Malu123 features yet. See the plan and status.
 
 ## Build
 
 ```sh
-cargo build --release -p gridcraft-cli -p gridcraft      # CLI and desktop app
-cargo run --release -p gridcraft -- --sample sales      # open a sample workbook
+cargo build --release -p malu123-cli -p malu123         # CLI and desktop app
+cargo run --release -p malu123 -- --sample sales        # open a sample workbook
 cargo xtask ci                                          # fmt, clippy, tests, assets, layers, wasm
 ```
 
@@ -34,9 +34,11 @@ run. On the MaluOS dev VM, run cargo under a memory-capped cgroup (see the plan,
 
 ## Upstream
 
-`upstream` is `https://github.com/storytold/gridcraft`. Engine, formula, calc, XLSX and chart
-crates stay as upstream ships them so merges remain cheap; Malu123 code lives in new crates and
-fenced UI hooks. GridCraft's contributor rules ([`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md))
+`upstream` is `https://github.com/storytold/gridcraft`. Every `gridcraft` name became `malu123`
+through one script, `scripts/rename-upstream.sh`; upstream changes come in through the
+`upstream-renamed` vendor branch (see `docs/malu123/rename.md`). Engine, formula, calc, XLSX and
+chart crates stay as upstream ships them in substance; Malu123 code lives in new crates and fenced
+UI hooks. GridCraft's contributor rules ([`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md))
 apply here unchanged, plus the Malu123 section at the top of `CLAUDE.md`.
 
 ## License and credits

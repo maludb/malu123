@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 
-use gridcraft_core::{CellRef, MAX_COLS, MAX_ROWS, RangeRef};
-use gridcraft_formula::adjust::{Axis, Edit};
-use gridcraft_model::{Anchor, AnchorMode, Sheet, Visibility};
+use malu123_core::{CellRef, MAX_COLS, MAX_ROWS, RangeRef};
+use malu123_formula::adjust::{Axis, Edit};
+use malu123_model::{Anchor, AnchorMode, Sheet, Visibility};
 use serde_json::{Value as Json, json};
 
 use super::*;
@@ -223,14 +223,14 @@ fn shift_sheet_features(sh: &mut Sheet, axis: Axis, at: u32, count: u32, insert:
 }
 
 /// Rewrites every formula reference (and chart series) for a structural edit on `target`.
-pub(super) fn rewrite(wb: &mut gridcraft_model::Workbook, target: &str, e: &Edit) {
+pub(super) fn rewrite(wb: &mut malu123_model::Workbook, target: &str, e: &Edit) {
     super::edit::rewrite_all_formulas(wb, target, e);
     for si in 0..wb.sheets.len() {
         let host = wb.sheets.get(si).map(|s| s.name.clone()).unwrap_or_default();
         let Some(sh) = wb.sheet_mut(si) else { continue };
         let fix = |text: &str| -> String {
-            match gridcraft_formula::parse(text) {
-                Ok(expr) => gridcraft_formula::print(&gridcraft_formula::adjust::adjust(expr, &host, target, e)),
+            match malu123_formula::parse(text) {
+                Ok(expr) => malu123_formula::print(&malu123_formula::adjust::adjust(expr, &host, target, e)),
                 Err(_) => text.to_string(),
             }
         };
@@ -250,9 +250,9 @@ pub(super) fn rewrite(wb: &mut gridcraft_model::Workbook, target: &str, e: &Edit
         // moves them, so table and name sources keep their text.
         for pt in sh.pivots.iter_mut() {
             let body = pt.source.trim().trim_start_matches('=');
-            if let Ok(expr) = gridcraft_formula::parse(body) {
-                let before = gridcraft_formula::print(&expr);
-                let after = gridcraft_formula::print(&gridcraft_formula::adjust::adjust(expr, &host, target, e));
+            if let Ok(expr) = malu123_formula::parse(body) {
+                let before = malu123_formula::print(&expr);
+                let after = malu123_formula::print(&malu123_formula::adjust::adjust(expr, &host, target, e));
                 if after != before {
                     pt.source = after;
                 }
@@ -302,7 +302,7 @@ fn insert_lines(s: &mut Session, p: &Json, axis: Axis) -> Result<Json> {
                 if let Some(info) = prev {
                     for i in at..at + count {
                         let map = if axis == Axis::Rows { &mut sh.rows } else { &mut sh.cols };
-                        map.insert(i, gridcraft_model::LineInfo { hidden: false, outline: 0, collapsed: false, ..info });
+                        map.insert(i, malu123_model::LineInfo { hidden: false, outline: 0, collapsed: false, ..info });
                     }
                 }
             }
@@ -723,7 +723,7 @@ fn check_lines_protection(s: &Session, p: &Json, axis: Axis, at: u32, count: u32
         (Axis::Cols, true) => pr.insert_columns,
         (Axis::Cols, false) => pr.delete_columns,
     };
-    let locked = |st: gridcraft_model::StyleId| wb.styles.get(st).protection.locked;
+    let locked = |st: malu123_model::StyleId| wb.styles.get(st).protection.locked;
     let refuse = || EngineError::Other(PROTECTED.into());
     if !allowed {
         return Err(refuse());
@@ -758,14 +758,14 @@ fn delete_sheet(s: &mut Session, p: &Json) -> Result<Json> {
     edit_doc(d, |cx| {
         cx.wb.sheets.remove(i);
         for si in 0..cx.wb.sheets.len() {
-            let keys: Vec<(CellRef, Arc<gridcraft_model::Formula>)> =
+            let keys: Vec<(CellRef, Arc<malu123_model::Formula>)> =
                 cx.wb.sheets.get(si).map(|s| s.cells.iter().filter_map(|(c, x)| x.formula.clone().map(|f| (c, f))).collect()).unwrap_or_default();
             let Some(sh) = cx.wb.sheet_mut(si) else { continue };
             for (c, f) in keys {
                 if let Some(e) = f.expr() {
-                    let ne = gridcraft_formula::adjust::delete_sheet(e, &name, &order);
+                    let ne = malu123_formula::adjust::delete_sheet(e, &name, &order);
                     if let Some(cell) = sh.cells.get_mut(c) {
-                        cell.formula = Some(Arc::new(gridcraft_model::Formula::from_expr(ne)));
+                        cell.formula = Some(Arc::new(malu123_model::Formula::from_expr(ne)));
                     }
                 }
             }
@@ -778,10 +778,10 @@ fn delete_sheet(s: &mut Session, p: &Json) -> Result<Json> {
                 *sc -= 1;
             }
             // Names referring to the sheet become #REF!.
-            if let Ok(e) = gridcraft_formula::parse_name(&n.formula) {
-                let ne = gridcraft_formula::adjust::delete_sheet(e.clone(), &name, &order);
+            if let Ok(e) = malu123_formula::parse_name(&n.formula) {
+                let ne = malu123_formula::adjust::delete_sheet(e.clone(), &name, &order);
                 if ne != e {
-                    n.formula = gridcraft_formula::print(&ne);
+                    n.formula = malu123_formula::print(&ne);
                 }
             }
         }
@@ -809,23 +809,23 @@ fn rename_sheet(s: &mut Session, p: &Json) -> Result<Json> {
         let old = cx.wb.sheet(i).map(|s| s.name.clone()).unwrap_or_default();
         cx.sheet_mut(i)?.name = name.clone();
         for si in 0..cx.wb.sheets.len() {
-            let keys: Vec<(CellRef, Arc<gridcraft_model::Formula>)> =
+            let keys: Vec<(CellRef, Arc<malu123_model::Formula>)> =
                 cx.wb.sheets.get(si).map(|s| s.cells.iter().filter_map(|(c, x)| x.formula.clone().map(|f| (c, f))).collect()).unwrap_or_default();
             let Some(sh) = cx.wb.sheet_mut(si) else { continue };
             for (c, f) in keys {
                 if let Some(e) = f.expr() {
-                    let ne = gridcraft_formula::adjust::rename_sheet(e, &old, &name);
-                    let text = gridcraft_formula::print(&ne);
+                    let ne = malu123_formula::adjust::rename_sheet(e, &old, &name);
+                    let text = malu123_formula::print(&ne);
                     if text != f.text
                         && let Some(cell) = sh.cells.get_mut(c)
                     {
-                        cell.formula = Some(Arc::new(gridcraft_model::Formula::from_expr(ne)));
+                        cell.formula = Some(Arc::new(malu123_model::Formula::from_expr(ne)));
                     }
                 }
             }
             let fix = |t: &str| {
-                gridcraft_formula::parse(t)
-                    .map(|e| gridcraft_formula::print(&gridcraft_formula::adjust::rename_sheet(e, &old, &name)))
+                malu123_formula::parse(t)
+                    .map(|e| malu123_formula::print(&malu123_formula::adjust::rename_sheet(e, &old, &name)))
                     .unwrap_or_else(|_| t.to_string())
             };
             for ch in sh.charts.iter_mut() {
@@ -843,8 +843,8 @@ fn rename_sheet(s: &mut Session, p: &Json) -> Result<Json> {
             }
         }
         for n in cx.wb.names.iter_mut() {
-            if let Ok(e) = gridcraft_formula::parse_name(&n.formula) {
-                n.formula = gridcraft_formula::print(&gridcraft_formula::adjust::rename_sheet(e, &old, &name));
+            if let Ok(e) = malu123_formula::parse_name(&n.formula) {
+                n.formula = malu123_formula::print(&malu123_formula::adjust::rename_sheet(e, &old, &name));
             }
         }
         cx.structural = true;
@@ -879,16 +879,16 @@ fn move_sheet(s: &mut Session, p: &Json) -> Result<Json> {
             sh.preserved = None; // kept file content (form controls, OLE objects…) stays with the original
             let at = to.min(n);
             // The copy gets its own copies of the sheet's names, referring to the copy.
-            let copies: Vec<gridcraft_model::DefinedName> = cx
+            let copies: Vec<malu123_model::DefinedName> = cx
                 .wb
                 .names
                 .iter()
                 .filter(|nm| nm.scope == Some(i))
                 .map(|nm| {
-                    let formula = gridcraft_formula::parse_name(&nm.formula)
-                        .map(|e| gridcraft_formula::print(&gridcraft_formula::adjust::rename_sheet(e, &base, &sh.name)))
+                    let formula = malu123_formula::parse_name(&nm.formula)
+                        .map(|e| malu123_formula::print(&malu123_formula::adjust::rename_sheet(e, &base, &sh.name)))
                         .unwrap_or_else(|_| nm.formula.clone());
-                    gridcraft_model::DefinedName { scope: Some(at), formula, ..nm.clone() }
+                    malu123_model::DefinedName { scope: Some(at), formula, ..nm.clone() }
                 })
                 .collect();
             for nm in cx.wb.names.iter_mut() {
@@ -927,7 +927,7 @@ fn tab_color(s: &mut Session, p: &Json) -> Result<Json> {
     let i = target_sheet(s, p)?;
     let c = super::format::color_param(p.get("color"));
     edit(s, |cx| {
-        cx.sheet_mut(i)?.tab_color = c.filter(|c| *c != gridcraft_model::Color::Auto);
+        cx.sheet_mut(i)?.tab_color = c.filter(|c| *c != malu123_model::Color::Auto);
         Ok(Json::Null)
     })
 }
@@ -993,15 +993,15 @@ fn step_sheet(s: &mut Session, dir: isize) -> Result<Json> {
 
 /// Where a range of the edited sheet goes after a structural edit (`None` = deleted).
 pub(crate) fn map_range(r: RangeRef, e: &Edit) -> Option<RangeRef> {
-    let expr = gridcraft_formula::Expr::Ref(gridcraft_formula::Reference {
-        sheet: gridcraft_formula::SheetSel::Current,
-        kind: gridcraft_formula::RefKind::Range(
-            gridcraft_formula::Anchor { row: r.start.row, col: r.start.col, row_abs: false, col_abs: false },
-            gridcraft_formula::Anchor { row: r.end.row, col: r.end.col, row_abs: false, col_abs: false },
+    let expr = malu123_formula::Expr::Ref(malu123_formula::Reference {
+        sheet: malu123_formula::SheetSel::Current,
+        kind: malu123_formula::RefKind::Range(
+            malu123_formula::Anchor { row: r.start.row, col: r.start.col, row_abs: false, col_abs: false },
+            malu123_formula::Anchor { row: r.end.row, col: r.end.col, row_abs: false, col_abs: false },
         ),
     });
-    match gridcraft_formula::adjust::adjust(expr, "S", "S", e) {
-        gridcraft_formula::Expr::Ref(r) => Some(r.range()),
+    match malu123_formula::adjust::adjust(expr, "S", "S", e) {
+        malu123_formula::Expr::Ref(r) => Some(r.range()),
         _ => None,
     }
 }
@@ -1056,7 +1056,7 @@ pub(super) fn shift_cell_features(sh: &mut Sheet, e: &Edit) {
 
 /// Columns inserted inside a table become new table columns (with names no other column has);
 /// deleted ones leave it.
-fn shift_table_columns(t: &mut gridcraft_model::Table, at: u32, count: u32, insert: bool) {
+fn shift_table_columns(t: &mut malu123_model::Table, at: u32, count: u32, insert: bool) {
     if insert {
         if at > t.range.start.col && at <= t.range.end.col {
             let idx = (at - t.range.start.col) as usize;
@@ -1069,14 +1069,8 @@ fn shift_table_columns(t: &mut gridcraft_model::Table, at: u32, count: u32, inse
                         break name;
                     }
                 };
-                let col = gridcraft_model::TableColumn {
-                    name,
-                    totals: Default::default(),
-                    totals_label: None,
-                    formula: None,
-                    unique_name: None,
-                    xml: None,
-                };
+                let col =
+                    malu123_model::TableColumn { name, totals: Default::default(), totals_label: None, formula: None, unique_name: None, xml: None };
                 t.columns.insert((idx + k).min(t.columns.len()), col);
             }
         }

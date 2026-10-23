@@ -185,8 +185,8 @@ impl Language {
         }
     }
 
-    pub fn formula_locale(self) -> gridcraft_engine::formula::FormulaLocale {
-        if self == Self::Es { gridcraft_engine::formula::FormulaLocale::Es } else { gridcraft_engine::formula::FormulaLocale::En }
+    pub fn formula_locale(self) -> malu123_engine::formula::FormulaLocale {
+        if self == Self::Es { malu123_engine::formula::FormulaLocale::Es } else { malu123_engine::formula::FormulaLocale::En }
     }
 
     /// Translates an interface label; untranslated labels fall back to English.
@@ -283,7 +283,7 @@ pub fn saved_language(ui_json: &serde_json::Value) -> Option<Language> {
 /// egui context-data key holding the language of the frame being drawn. Widgets that only get a
 /// `Ui` (not the app) read it to translate their labels; [`set_current`] writes it once per frame.
 fn lang_key() -> egui::Id {
-    egui::Id::new("gridcraft.language")
+    egui::Id::new("malu123.language")
 }
 
 /// The language the current frame is drawing in. `En` when unset.
@@ -326,7 +326,7 @@ mod tests {
     fn function_help_is_sorted_and_keyed_by_current_catalog_text() {
         // Lookups binary-search the tables. A key that no longer matches the catalog (an English
         // description reworded, an argument renamed) would quietly show English again.
-        let catalog = gridcraft_engine::cmd::formulas::function_list();
+        let catalog = malu123_engine::cmd::formulas::function_list();
         let descriptions: std::collections::HashSet<&str> = catalog.iter().filter_map(|f| f["description"].as_str()).collect();
         let arguments: std::collections::HashSet<&str> =
             catalog.iter().filter_map(|f| f["signature"].as_str()).flat_map(crate::formula_locale::argument_names).collect();
@@ -632,7 +632,7 @@ mod tests {
 
     #[test]
     fn language_commands_switch_and_persist() {
-        let mut app = crate::SheetApp::new(gridcraft_engine::Session::default(), Default::default());
+        let mut app = crate::SheetApp::new(malu123_engine::Session::default(), Default::default());
         for language in Language::ALL {
             app.run("app.language.set", serde_json::json!({"language": language.code()})).unwrap();
             assert_eq!(app.ui.language, language);

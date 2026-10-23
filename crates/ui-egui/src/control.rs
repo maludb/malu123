@@ -18,7 +18,7 @@
 
 use std::sync::mpsc::Sender;
 
-use gridcraft_engine::core::CellRef;
+use malu123_engine::core::CellRef;
 use serde_json::{Value as Json, json};
 
 use crate::SheetApp;
@@ -440,7 +440,7 @@ pub fn handle(app: &mut SheetApp, ctx: &egui::Context, method: &str, p: &Json) -
             ok(Json::Null)
         }
         // Anything else that names a command runs it.
-        other if gridcraft_engine::find_command(other).is_some() => wrap(run(app, other, p.clone())),
+        other if malu123_engine::find_command(other).is_some() => wrap(run(app, other, p.clone())),
         other => err(format!("unknown method `{other}`")),
     };
     ctx.request_repaint();
@@ -540,7 +540,7 @@ pub fn save_image(image: &egui::ColorImage, path: Option<&str>) -> Json {
             Ok(()) => json!({"ok": true, "result": {"path": p, "width": w, "height": h}}),
             Err(e) => json!({"ok": false, "error": e.to_string()}),
         },
-        None => json!({"ok": true, "result": {"base64": gridcraft_engine::io::base64_encode(&png), "width": w, "height": h}}),
+        None => json!({"ok": true, "result": {"base64": malu123_engine::io::base64_encode(&png), "width": w, "height": h}}),
     }
 }
 
@@ -571,7 +571,7 @@ mod tests {
     }
 
     fn test_app() -> SheetApp {
-        let mut session = gridcraft_engine::Session::new();
+        let mut session = malu123_engine::Session::new();
         session.new_workbook();
         SheetApp::new(session, crate::Services::default())
     }
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn print_command_discovery_documents_settings_and_submission() {
-        let mut session = gridcraft_engine::Session::new();
+        let mut session = malu123_engine::Session::new();
         session.new_workbook();
         let mut app = SheetApp::new(session, crate::Services::default());
         let Outcome::Done(reply) = handle(&mut app, &egui::Context::default(), "engine.commands", &json!({"search":"print"})) else {
@@ -624,7 +624,7 @@ mod tests {
 
     #[test]
     fn language_command_docs_list_every_language() {
-        let mut session = gridcraft_engine::Session::new();
+        let mut session = malu123_engine::Session::new();
         session.new_workbook();
         let mut app = SheetApp::new(session, crate::Services::default());
         let Outcome::Done(reply) = handle(&mut app, &egui::Context::default(), "engine.commands", &json!({"search":"language"})) else {

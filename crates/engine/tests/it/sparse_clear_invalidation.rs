@@ -1,7 +1,7 @@
 //! Clearing a large sparse selection must invalidate every changed cell (issue #1032).
 
-use gridcraft_core::{CellError, CellRef, Value};
-use gridcraft_engine::Session;
+use malu123_core::{CellError, CellRef, Value};
+use malu123_engine::Session;
 use serde_json::json;
 
 fn value(s: &Session, address: &str) -> Value {
