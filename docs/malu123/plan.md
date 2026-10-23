@@ -1,6 +1,6 @@
 # Malu123 plan
 
-> **Created:** 2026-10-23 · **Status:** Phase 0 in progress · **Upstream:** [storytold/gridcraft](https://github.com/storytold/gridcraft) at `33a45130` (v0.11.1)
+> **Created:** 2026-10-23 · **Updated:** 2026-10-23 (owner decisions recorded) · **Status:** Phase 0 in progress · **Upstream:** [storytold/gridcraft](https://github.com/storytold/gridcraft) at `33a45130` (v0.11.1)
 
 Malu123 is the MaluOS spreadsheet: an Excel-compatible desktop app with an LLM assistant built
 in. It is a fork of GridCraft, a clean-room Rust spreadsheet with an XLSX-native engine, a
@@ -27,9 +27,13 @@ agents), or MaluOS branding. That is Malu123's work.
 
 1. **Stay mergeable with upstream.** GridCraft moves fast (1,750 commits, 50 open PRs). Our
    value is the assistant and the MaluOS fit, not a better spreadsheet engine. Engine, formula,
-   calc, xlsx and chart crates stay untouched except for upstream merges and bug fixes sent
-   upstream. Malu123 code lives in new crates and in clearly fenced UI hooks. We merge
-   `upstream/main` monthly or per upstream release.
+   calc, xlsx and chart crates stay untouched in substance except for upstream merges and bug
+   fixes sent upstream. Malu123 code lives in new crates and in clearly fenced UI hooks. The
+   owner chose a full rename to `malu123-*` (see Decisions), so merges go through a vendor
+   branch: `upstream-renamed` is `upstream/main` plus one scripted rename commit; `main` branches
+   from it. To sync: `git merge upstream/main` on `upstream-renamed`, re-run
+   `scripts/rename-upstream.sh` to catch new names, then merge `upstream-renamed` into `main`.
+   The script is the single source of the name mapping. We sync monthly or per upstream release.
 2. **Everything the assistant does is a command.** The assistant never pokes the model directly.
    It calls the same command catalog a person's click calls, so undo, history, the control channel
    and tests all cover it for free.
@@ -74,27 +78,28 @@ Estimates are agent-hours on this host (one agent, release builds take ~10 min).
 | 0.1 | Fork: full upstream history, `origin` = maludb/malu123, `upstream` = storytold/gridcraft; remove ArtCraft brand files (required by their licence); Malu123 README, CLAUDE.md, this plan | pushed |
 | 0.2 | Toolchain on the dev host: rustup, wasm target, Linux build deps; release build of the CLI and desktop app under a memory-capped cgroup (the dev VM dies on page-cache pressure) | `gridcraft-cli eval '=SUM(1,2,3)'` prints 6; the desktop binary links |
 | 0.3 | `cargo xtask ci` passes on this host (fmt, clippy, tests, assets, layers, wasm); note any test that needs a font dir or corpus and skip it deliberately | green, with a list of skipped tests in `docs/malu123/status.md` |
-| 0.4 | Rename plan decided: binaries `malu123` and `malu123-cli`, app id `com.maludb.malu123`, config dir `~/.config/malu123`, log name, desktop file, MIME file. Crate names stay `gridcraft-*` for mergeability; only the L7 apps and packaging are renamed | written up in `docs/malu123/rename.md` before any sed |
+| 0.4 | `scripts/rename-upstream.sh`: the one deterministic mapping (crate names `gridcraft-*` → `malu123-*`, Rust paths `gridcraft_*` → `malu123_*`, binaries `malu123` and `malu123-cli`, app id `org.maluos.malu123`, config dir `~/.config/malu123`, log names, env vars `MALU123_*`, desktop and MIME files, MCP resource scheme `malu123://`). Create the `upstream-renamed` vendor branch, rebase `main` onto it. Keep "GridCraft" in NOTICE, credits and the About box | `cargo xtask ci` green after the rename; `docs/malu123/rename.md` documents the mapping and the sync procedure |
 
 ### Phase 1: Malu123 the spreadsheet (ship something)
 
 | Step | Work | Done when |
 |---|---|---|
-| 1.1 | Rename L7 apps and packaging per 0.4; app icon (original SVG, MaluOS palette), window title, About box, credits page keeps GridCraft attribution | app runs as Malu123 |
+| 1.1 | App identity on top of the 0.4 rename: app icon (original SVG, MaluOS palette), window title, About box, credits page keeps GridCraft attribution | app runs as Malu123 |
 | 1.2 | Settings dir, logs and preferences under the Malu123 name; migration from nothing (fresh install) | fresh profile works |
 | 1.3 | Deb packaging the MaluOS way: `packages/malu123` in the maluos repo with `debian/`, built by `scripts/build-packages.sh`, depends on the runtime libs nfpm lists (libxkbcommon0, libvulkan1 or libegl1, wayland/x11 recommends); desktop file in the MaluOS Office folder of the GNOME grid | `.deb` installs on a desktop image; launches from the grid; opens `.xlsx` by double-click |
 | 1.4 | Boot test on the desktop image; add to the Phase 12 desktop ISO; release on apt.maluos.com | in a MaluOS release |
 | 1.5 | Fonts: MaluOS ships its own fonts; point `CRAFT_FONTS_DIR` at nothing and verify system-font fallback renders Latin, CJK and Arabic acceptably on the desktop image (upstream gap #5) | screenshots in `docs/malu123/status.md` |
+| 1.6 | Web app: `malu123-web` package serving the trunk build (`apps/malu123-web`) from the MaluOS gateway or nginx on the LAN; open and save through the browser's file picker as upstream does; same version as the desktop | reachable from another desk's browser on the dev network |
 
 ### Phase 2: the LLM client crate (`malu123-llm`)
 
 | Step | Work | Done when |
 |---|---|---|
 | 2.1 | `LlmClient` trait: `complete(request) -> Result<Stream<Event>>` with messages, system prompt, tool definitions, tool results, streaming text and tool-call events, token usage; typed error enum | unit tests with a mock backend |
-| 2.2 | Backend: MaluOS gateway (`/run/maluos/gateway.sock`, Unix socket, peer credentials) and local agent task interface (`/run/maluos/agents/NAME/tasks.sock`, JSON-RPC shaped like A2A); this is the default on MaluOS and needs no key | works against the demo agent on the dev VM |
+| 2.2 | Backend: MaluOS gateway (`/run/maluos/gateway.sock`, Unix socket, peer credentials) and local agent task interface (`/run/maluos/agents/NAME/tasks.sock`, JSON-RPC shaped like A2A). **This is the default on a fresh MaluOS install** (owner decision): no key, works offline with the local LLM server. The Claude API is opt-in from the settings dialog once a key is in the vault | works against the demo agent on the dev VM |
 | 2.3 | Backend: Claude API (Messages API, streaming, tool use, prompt caching for the workbook context); key from the MaluOS vault (`/run/maluos/vault.sock`) or from an env var off-MaluOS | integration test behind `MALU123_LIVE_LLM=1` |
 | 2.4 | Backend: OpenAI-compatible HTTP (covers local servers: llama.cpp, vLLM, the future maluos-local-llm-server) | same test |
-| 2.5 | HTTP transport choice: `ureq` (blocking, rustls, no tokio) on native; `ehttp` on wasm so the web build still compiles with the assistant stubbed | wasm gate stays green |
+| 2.5 | HTTP transport choice: `ureq` (blocking, rustls, no tokio) on native; `ehttp` on wasm. Because the web app ships (owner decision), the assistant is not stubbed on wasm: the browser build talks to the gateway over HTTPS through the web package's reverse proxy, with the desk token, never a raw API key in the browser | wasm gate green; assistant works in the browser against the gateway |
 | 2.6 | Provider settings: a `malu123.toml` in the config dir (provider, model, endpoint) edited from a settings dialog; never stores keys | dialog works, file round-trips |
 
 ### Phase 3: the assistant crate (`malu123-assist`) and pane
@@ -139,13 +144,11 @@ languages; the assistant prompt follows the UI language.
 - Never commit: fonts, Excel-authored files, screenshots of Microsoft software, API keys,
   `plan/` (gitignored, local).
 
-## Open decisions for the owner
+## Decisions (owner, 2026-10-23)
 
-1. **Default provider on MaluOS**: the gateway/agent route (no key, works offline with the local
-   LLM server) or the Claude API (better answers, needs a key in the vault)? The plan builds both;
-   the default affects the first-run experience.
-2. **Crate names**: keep `gridcraft-*` for mergeability (recommended) or rename everything to
-   `malu123-*` now and pay for every upstream merge?
-3. **Web build**: keep it compiling only (recommended) or ship it as a MaluOS web app too?
-4. **App id**: `com.maludb.malu123` or `org.maluos.malu123`? (The other MaluOS packages use
-   the `maluos-` prefix and `maludb.org` for the maintainer.)
+| Decision | Choice | Consequence |
+|---|---|---|
+| Default LLM provider on MaluOS | The MaluOS gateway and local agents; Claude API opt-in via the vault | First run needs no key; step 2.2 before 2.3 |
+| Crate names | Rename everything to `malu123-*` | Upstream merges cost more; mitigated by the scripted rename and the `upstream-renamed` vendor branch (principle 1, step 0.4) |
+| Web build | Ship it as a MaluOS web app | New step 1.6 (`malu123-web` package) and the assistant works in the browser through the gateway (step 2.5) |
+| App id | `org.maluos.malu123` | Desktop file, icon theme path, MIME registration, config dir name |
