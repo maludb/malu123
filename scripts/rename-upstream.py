@@ -42,6 +42,9 @@ MAP = [
     ("https://getartcraft.com/apps", "https://github.com/maludb"),
     ("https://getartcraft.com/", "https://maluos.com/"),
     ("Learning Machines LLC", "MaluOS"),
+    ("GridCraft maintainers <gridcraft@storyteller.ai>", "Edward Honour <ed@maludb.org>"),
+    ("Malu123 maintainers <malu123@storyteller.ai>", "Edward Honour <ed@maludb.org>"),  # re-runs see the renamed form
+    ('developer id="ai.storyteller"', 'developer id="org.maluos"'),
     ("storytold/gridcraft", "maludb/malu123"),
     ("Library/Application Support/GridCraft", "Library/Application Support/Malu123"),
     # the generic case variants

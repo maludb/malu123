@@ -7,7 +7,7 @@
   <project_license>MIT OR Apache-2.0</project_license>
   <name>Malu123</name>
   <summary>Calculate, analyse and chart data in workbooks</summary>
-  <developer id="ai.storyteller">
+  <developer id="org.maluos">
     <name>MaluOS</name>
   </developer>
   <description>

@@ -38,7 +38,7 @@ case "$ARCH" in
   aarch64 | arm64) ARCH=aarch64; DEB_ARCH=arm64 ;;
   *) echo "unsupported architecture $ARCH" >&2; exit 2 ;;
 esac
-export MALU123_MAINTAINER="${MALU123_MAINTAINER:-Malu123 maintainers <malu123@storyteller.ai>}"
+export MALU123_MAINTAINER="${MALU123_MAINTAINER:-Edward Honour <ed@maludb.org>}"
 BASENAME="malu123-$VERSION-linux-$ARCH"
 
 echo "==> Malu123 $VERSION for Linux $ARCH ($FORMATS)"

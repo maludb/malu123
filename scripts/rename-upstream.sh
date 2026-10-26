@@ -15,6 +15,10 @@ cd "$(git rev-parse --show-toplevel)"
 # Files this script never rewrites: they describe the fork itself.
 SKIP='^(README\.md|NOTICE|LICENSE-MIT|LICENSE-APACHE|docs/malu123/.*|scripts/rename-upstream\..*)$'
 
+# 0. the session-transcript folder a Claude Code plugin writes into the checkout must never be tracked
+grep -qx '/docs/claude-log/' .gitignore || echo '/docs/claude-log/' >> .gitignore
+if git ls-files --error-unmatch docs/claude-log >/dev/null 2>&1; then git rm -rq --cached docs/claude-log; fi
+
 # 1. brand files, and the three places that call them "the one exception"
 if [ -d docs/brand ]; then git rm -rq docs/brand; fi
 sed -i '/^| `docs\/brand\//d' ATTRIBUTION.md
