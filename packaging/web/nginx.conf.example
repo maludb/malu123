@@ -1,0 +1,10 @@
+# Malu123 for the browser under nginx (package malu123-web). Include inside a server block.
+location /malu123/ {
+    alias /usr/share/malu123-web/;
+    types { application/wasm wasm; text/javascript js; text/html html; }
+    gzip on;
+    gzip_types application/wasm text/javascript text/html;
+    add_header X-Content-Type-Options nosniff;
+    location ~* \.(wasm|js)$ { add_header Cache-Control "public, max-age=31536000, immutable"; }
+    location ~* index\.html$ { add_header Cache-Control "no-cache"; }
+}

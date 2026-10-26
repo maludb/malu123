@@ -1,0 +1,42 @@
+# malu123-web: the browser build as a Debian package (Malu123 addition, not upstream).
+# Run by packaging/web/deb.sh, which builds the site and exports VERSION, STAGE and NFPM_ARCH.
+#
+#   nfpm package -f packaging/web/nfpm.yaml -p deb -t dist/release/
+name: malu123-web
+arch: all
+platform: linux
+version: ${VERSION}
+version_schema: semver
+release: 1
+section: web
+priority: optional
+maintainer: Edward Honour <ed@maludb.org>
+vendor: MaluOS
+homepage: https://github.com/maludb/malu123
+license: MIT OR Apache-2.0
+description: |-
+  Malu123 spreadsheet for the browser (WebAssembly): a static site under
+  /usr/share/malu123-web. Where Apache is installed (the MaluOS server
+  edition), the package enables /malu123/ on it; an nginx example is in
+  /usr/share/doc/malu123-web.
+
+overrides:
+  deb:
+    recommends:
+      - apache2
+
+contents:
+  - src: ${STAGE}/site/
+    dst: /usr/share/malu123-web/
+    type: tree
+  - src: packaging/web/apache.conf
+    dst: /etc/apache2/conf-available/malu123-web.conf
+    type: config
+  - src: packaging/web/nginx.conf.example
+    dst: /usr/share/doc/malu123-web/nginx.conf.example
+  - src: packaging/web/README.md
+    dst: /usr/share/doc/malu123-web/README.md
+
+scripts:
+  postinstall: packaging/web/postinst.sh
+  preremove: packaging/web/prerm.sh
