@@ -1743,9 +1743,11 @@ fn about(ui: &mut egui::Ui, d: &mut Dialog) {
             ui.heading("Malu123");
             ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
             ui.add_space(4.0);
-            ui.label("A clean-room, open-source, Rust-native spreadsheet. Part of ArtCraft.");
+            // Malu123: fork identity. Upstream credit stays here and under Contributors.
+            ui.label("The MaluOS spreadsheet: open source, Excel-compatible, written in Rust.");
+            ui.label("Built on GridCraft by the ArtCraft team (MIT OR Apache-2.0).");
             ui.hyperlink_to("github.com/maludb/malu123", "https://github.com/maludb/malu123");
-            ui.hyperlink_to("Join the ArtCraft Discord", "https://discord.gg/artcraft");
+            ui.hyperlink_to("github.com/storytold/gridcraft (upstream)", "https://github.com/storytold/gridcraft");
         }
     }
 }

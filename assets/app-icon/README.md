@@ -1,28 +1,20 @@
-# Malu123 app icon (PLACEHOLDER)
+# Malu123 app icon
 
-**This icon is temporary.** Every Crafting App's icon is an engraved creature portrait that the
-product owner makes (craftrules `standards/icon-design.md`); Malu123's hasn't been made yet.
-Until it is, this placeholder stands in: a simple ledger page with a header row, a row-number
-column, a selected cell with its fill handle and a double rule under a total, on a full-bleed
-Malu123-green tile. It is original geometry written by hand for this repository, deliberately
-not modelled on any vendor's spreadsheet logo (no letters, no "X", no overlapping panels).
+A worksheet on the MaluOS navy tile: a green header row, a tinted row-number column, faint grid
+lines, a rising column series drawn over the cells, and the active cell with its fill handle. It
+is original geometry written by hand for this repository (MIT OR Apache-2.0), not modelled on any
+vendor's spreadsheet logo (no letters, no "X", no overlapping panels). It replaces upstream
+GridCraft's placeholder ledger-page icon.
 
-When the owner's art arrives, replace `malu123.svg`, run `packaging/icons.sh`, update this
-README (provenance, creature) and the rows in `ATTRIBUTION.md`, and drop the word placeholder.
+Regenerate every size with `packaging/icons.sh` (needs `resvg`). The outputs are committed.
 
 ## Palette
 
-Exactly three colours:
-
 | Colour | Hex | Used for |
 |---|---|---|
-| Ink | `#0b0b0c` | Line work and contour |
-| Paper | `#efe9dc` | The page |
-| Malu123 green (app colour, **proposed**) | `#1f9d55` | The full-bleed field and the header cells |
-
-The app colour is a proposal pending the owner's approval: Malu123 green `#1f9d55`, with ink
-(darker) variant `#147a40` for text and accents on light backgrounds. It differs from
-DesignCraft's `#7bb51c`.
+| MaluOS navy | `#16213a` | The tile, the dark columns, the active-cell outline |
+| Paper | `#f4f1ea` | The sheet |
+| Malu123 green | `#2fa36b` | The header row, the two leading columns, the row-number tint |
 
 ## Geometry
 
